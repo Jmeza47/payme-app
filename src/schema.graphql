@@ -1,0 +1,127 @@
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+type Customer {
+  _id: ID!
+  address: String!
+  lastName: String!
+  name: String!
+  phone1: String!
+  phone2: String
+  ref1: String!
+  ref1Tel: String!
+  ref2: String
+  ref2Tel: String
+}
+
+#  Relay Connection Type without pagination fields
+type CustomerConnection {
+  edges: [CustomerEdge]
+  pageInfo: PageInfo!
+}
+
+#  Relay Edge Type
+type CustomerEdge {
+  cursor: String!
+  node: Customer
+}
+
+type Loan {
+  _id: ID!
+  customerId: ID!
+  loanAmount: Float!
+  loanDate: String!
+  loanInterest: Float!
+  loanStatus: String!
+  loanTerm: Int!
+  paymentSchedule: [PaymentSchedule]!
+}
+
+type LoanConnection {
+  edges: [LoanEdge]
+  pageInfo: PageInfo!
+  totalCount: Int
+}
+
+type LoanEdge {
+  cursor: String!
+  node: Loan
+}
+
+type Mutation {
+  createCustomer(input: customerDataInput!): Customer
+  createLoan(input: loanDataInput!): Loan
+  deleteCustomer(_id: ID!): Customer
+  deleteLoan(_id: ID!): Loan
+  deleteLoansByCustomer(customerId: ID!): Loan
+  updateCustomer(_id: ID!, input: customerDataInput!): Customer
+  updateLoan(_id: ID!, input: loanDataInput!): Loan
+  updateLoanStatus(loanId: ID!, loanStatus: String): Loan
+  updatePaymentDueDays(dueDays: Int, extraInterest: Float, loanId: ID!, paymentScheduleId: ID!): Loan
+  updatePaymentStatus(loanId: ID!, paymentScheduleId: ID!, status: String): Loan
+}
+
+type PageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+}
+
+type PaymentSchedule {
+  _id: ID
+  amountPaid: Float!
+  dueDays: Int
+  extraInterest: Float
+  interestPaid: Float!
+  paymentDate: String!
+  status: paymentStatus
+}
+
+type Query {
+  customer(_id: ID!): Customer
+  customersConnection(after: String, first: Int): CustomerConnection
+  loan(_id: ID!): Loan
+  loansConnection(after: String, first: Int): LoanConnection
+}
+
+enum paymentStatus {
+  ACTIVE
+  PAID
+}
+
+# payment schedule definition
+input PaymentScheduleInput {
+  _id: ID
+  amountPaid: Float!
+  dueDays: Int
+  extraInterest: Float
+  interestPaid: Float!
+  paymentDate: String!
+  status: paymentStatus
+}
+
+input customerDataInput {
+  address: String!
+  lastName: String!
+  name: String!
+  phone1: String!
+  phone2: String
+  ref1: String!
+  ref1Tel: String!
+  ref2: String
+  ref2Tel: String
+}
+
+# loans definition
+input loanDataInput {
+  customerId: ID!
+  loanAmount: Float!
+  loanDate: String!
+  loanInterest: Float!
+  loanStatus: String!
+  loanTerm: Int!
+  paymentSchedule: [PaymentScheduleInput]!
+}

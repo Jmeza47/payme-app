@@ -1,0 +1,228 @@
+import { Button, Form, Input } from "antd";
+import { useNewCustomerForm } from "../hooks/useNewCustomerForm";
+import { useUpdateCustomer } from "../hooks/useUpdateCustomer";
+
+export default function NewCustomerForm() {
+  const {
+    submittable,
+    form,
+    values,
+    handleCreateCustomer,
+    isEditing,
+    editingValues,
+  } = useNewCustomerForm();
+
+  const { handleUpdateCustomer } = useUpdateCustomer();
+
+  return (
+    <>
+      <Form
+        layout="vertical"
+        form={form}
+        onFinish={() =>
+          isEditing
+            ? handleUpdateCustomer(editingValues._id!, values)
+            : handleCreateCustomer(values)
+        }
+        autoComplete="false"
+        initialValues={isEditing ? editingValues : undefined}
+      >
+        <div className="flex space-x-3">
+          <Form.Item
+            label="Nombres"
+            name="name"
+            rules={[
+              {
+                required: true,
+                message: "Ingrese un nombre/s para el cliente!",
+              },
+              {
+                min: 3,
+                message: "El nombre debe de tener un minimo de 3 caracteres",
+              },
+            ]}
+            className="w-full"
+          >
+            <Input placeholder="Ingrese los nombres" />
+          </Form.Item>
+          <Form.Item
+            label="Apellidos"
+            name="lastName"
+            rules={[
+              {
+                required: true,
+                message: "Ingrese el apellido/s del cliente!",
+              },
+              {
+                min: 3,
+                message: "El Apellido debe de tener un minimo de 3 caracteres",
+              },
+            ]}
+            className="w-full"
+          >
+            <Input placeholder="Ingrese los apellidos" />
+          </Form.Item>
+        </div>
+
+        <div className="flex space-x-3">
+          <Form.Item
+            label="Telefono #1"
+            name="phone1"
+            rules={[
+              {
+                required: true,
+                message: "Ingrese el telefono para el cliente!",
+              },
+              {
+                min: 9,
+                message: "El telefono require 9 caracteres",
+              },
+              {
+                max: 9,
+                message: "El telefono require 9 caracteres",
+              },
+              {
+                pattern: /^(\d{4})-\d{4}$/,
+                message: "El telefono debe estar en el formato 1234 - 5678",
+              },
+            ]}
+            className="w-full"
+          >
+            <Input placeholder="Ingrese el numero de telefono" />
+          </Form.Item>
+          <Form.Item
+            label="Telefono #2 (opcional)"
+            name="phone2"
+            rules={[
+              {
+                min: 9,
+                message: "El telefono require 9 caracteres",
+              },
+              {
+                max: 9,
+                message: "El telefono require 9 caracteres",
+              },
+              {
+                pattern: /^(\d{4})-\d{4}$/,
+                message: "El telefono debe estar en el formato 1234 - 5678",
+              },
+            ]}
+            className="w-full"
+          >
+            <Input placeholder="Ingrese el numero de telefono" />
+          </Form.Item>
+        </div>
+        <div>
+          <Form.Item
+            label="Direccion"
+            name="address"
+            rules={[
+              {
+                required: true,
+                message: "Ingrese la direccion del cliente!",
+              },
+              { min: 5, message: "La direccion es muy corta" },
+              {
+                max: 256,
+                message:
+                  "La direccion debe de tener un maximo de 256 caracteres",
+              },
+            ]}
+          >
+            <Input.TextArea
+              placeholder="Ingrese la direccion"
+              autoSize={{ minRows: 3, maxRows: 5 }}
+            />
+          </Form.Item>
+        </div>
+        <div className="flex space-x-3">
+          <Form.Item
+            label="Referencia #1"
+            name="ref1"
+            rules={[
+              {
+                required: true,
+                message: "Ingrese un nombre/s de la referencia!",
+              },
+              {
+                min: 3,
+                message: "El nombre debe de tener un minimo de 3 caracteres",
+              },
+            ]}
+            className="w-full"
+          >
+            <Input placeholder="Ingrese el numero de telefono" />
+          </Form.Item>
+          <Form.Item
+            label="Telefono Referencia #1"
+            name="ref1Tel"
+            rules={[
+              {
+                required: true,
+                message: "Ingrese el telefono de la referencia!",
+              },
+              {
+                min: 9,
+                message: "El telefono require 9 caracteres",
+              },
+              {
+                max: 9,
+                message: "El telefono require 9 caracteres",
+              },
+              {
+                pattern: /^(\d{4})-\d{4}$/,
+                message: "El telefono debe estar en el formato 1234 - 5678",
+              },
+            ]}
+            className="w-full"
+          >
+            <Input placeholder="Ingrese el numero de telefono" />
+          </Form.Item>
+        </div>
+        <div className="flex space-x-3">
+          <Form.Item
+            label="Referencia #2(opcional)"
+            name="ref2"
+            rules={[
+              {
+                min: 3,
+                message: "El nombre debe de tener un minimo de 3 caracteres",
+              },
+            ]}
+            className="w-full"
+          >
+            <Input placeholder="Ingrese el numero de telefono" />
+          </Form.Item>
+          <Form.Item
+            label="Telefono Referencia #2(opcional)"
+            name="ref2Tel"
+            rules={[
+              {
+                min: 9,
+                message: "El telefono require 9 caracteres",
+              },
+              {
+                max: 9,
+                message: "El telefono require 9 caracteres",
+              },
+              {
+                pattern: /^(\d{4})-\d{4}$/,
+                message: "El telefono debe estar en el formato 1234 - 5678",
+              },
+            ]}
+            className="w-full"
+          >
+            <Input placeholder="Ingrese el numero de telefono" />
+          </Form.Item>
+        </div>
+        <div>
+          <Form.Item>
+            <Button type="primary" htmlType="submit" disabled={!submittable}>
+              Guardar
+            </Button>
+          </Form.Item>
+        </div>
+      </Form>
+    </>
+  );
+}
