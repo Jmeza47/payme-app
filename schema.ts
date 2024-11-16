@@ -22,8 +22,8 @@ export const schema: Schema = {
                     "isRequired": true,
                     "attributes": []
                 },
-                "name": {
-                    "name": "name",
+                "address": {
+                    "name": "address",
                     "isArray": false,
                     "type": "String",
                     "isRequired": true,
@@ -31,6 +31,13 @@ export const schema: Schema = {
                 },
                 "lastName": {
                     "name": "lastName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "name": {
+                    "name": "name",
                     "isArray": false,
                     "type": "String",
                     "isRequired": true,
@@ -48,13 +55,6 @@ export const schema: Schema = {
                     "isArray": false,
                     "type": "String",
                     "isRequired": false,
-                    "attributes": []
-                },
-                "address": {
-                    "name": "address",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
                     "attributes": []
                 },
                 "ref1": {
@@ -87,60 +87,6 @@ export const schema: Schema = {
                 }
             }
         },
-        "CustomerEdge": {
-            "name": "CustomerEdge",
-            "fields": {
-                "node": {
-                    "name": "node",
-                    "isArray": false,
-                    "type": {
-                        "nonModel": "Customer"
-                    },
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "cursor": {
-                    "name": "cursor",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                }
-            }
-        },
-        "PageInfo": {
-            "name": "PageInfo",
-            "fields": {
-                "startCursor": {
-                    "name": "startCursor",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "endCursor": {
-                    "name": "endCursor",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "hasNextPage": {
-                    "name": "hasNextPage",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "hasPreviousPage": {
-                    "name": "hasPreviousPage",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": true,
-                    "attributes": []
-                }
-            }
-        },
         "CustomerConnection": {
             "name": "CustomerConnection",
             "fields": {
@@ -165,56 +111,21 @@ export const schema: Schema = {
                 }
             }
         },
-        "PaymentSchedule": {
-            "name": "PaymentSchedule",
+        "CustomerEdge": {
+            "name": "CustomerEdge",
             "fields": {
-                "_id": {
-                    "name": "_id",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "paymentDate": {
-                    "name": "paymentDate",
+                "cursor": {
+                    "name": "cursor",
                     "isArray": false,
                     "type": "String",
                     "isRequired": true,
                     "attributes": []
                 },
-                "amountPaid": {
-                    "name": "amountPaid",
-                    "isArray": false,
-                    "type": "Float",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "interestPaid": {
-                    "name": "interestPaid",
-                    "isArray": false,
-                    "type": "Float",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "dueDays": {
-                    "name": "dueDays",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "extraInterest": {
-                    "name": "extraInterest",
-                    "isArray": false,
-                    "type": "Float",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "status": {
-                    "name": "status",
+                "node": {
+                    "name": "node",
                     "isArray": false,
                     "type": {
-                        "enum": "PaymentStatus"
+                        "nonModel": "Customer"
                     },
                     "isRequired": false,
                     "attributes": []
@@ -245,17 +156,17 @@ export const schema: Schema = {
                     "isRequired": true,
                     "attributes": []
                 },
+                "loanDate": {
+                    "name": "loanDate",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
                 "loanInterest": {
                     "name": "loanInterest",
                     "isArray": false,
                     "type": "Float",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "loanTerm": {
-                    "name": "loanTerm",
-                    "isArray": false,
-                    "type": "Int",
                     "isRequired": true,
                     "attributes": []
                 },
@@ -266,10 +177,10 @@ export const schema: Schema = {
                     "isRequired": true,
                     "attributes": []
                 },
-                "loanDate": {
-                    "name": "loanDate",
+                "loanTerm": {
+                    "name": "loanTerm",
                     "isArray": false,
-                    "type": "String",
+                    "type": "Int",
                     "isRequired": true,
                     "attributes": []
                 },
@@ -282,27 +193,6 @@ export const schema: Schema = {
                     "isRequired": false,
                     "attributes": [],
                     "isArrayNullable": false
-                }
-            }
-        },
-        "LoanEdge": {
-            "name": "LoanEdge",
-            "fields": {
-                "node": {
-                    "name": "node",
-                    "isArray": false,
-                    "type": {
-                        "nonModel": "Loan"
-                    },
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "cursor": {
-                    "name": "cursor",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
                 }
             }
         },
@@ -332,6 +222,116 @@ export const schema: Schema = {
                     "name": "totalCount",
                     "isArray": false,
                     "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "LoanEdge": {
+            "name": "LoanEdge",
+            "fields": {
+                "cursor": {
+                    "name": "cursor",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "node": {
+                    "name": "node",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "Loan"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "PageInfo": {
+            "name": "PageInfo",
+            "fields": {
+                "endCursor": {
+                    "name": "endCursor",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "hasNextPage": {
+                    "name": "hasNextPage",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "hasPreviousPage": {
+                    "name": "hasPreviousPage",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "startCursor": {
+                    "name": "startCursor",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "PaymentSchedule": {
+            "name": "PaymentSchedule",
+            "fields": {
+                "_id": {
+                    "name": "_id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "amountPaid": {
+                    "name": "amountPaid",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "dueDays": {
+                    "name": "dueDays",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "extraInterest": {
+                    "name": "extraInterest",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "interestPaid": {
+                    "name": "interestPaid",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "paymentDate": {
+                    "name": "paymentDate",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "status": {
+                    "name": "status",
+                    "isArray": false,
+                    "type": {
+                        "enum": "PaymentStatus"
+                    },
                     "isRequired": false,
                     "attributes": []
                 }
