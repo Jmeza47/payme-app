@@ -25,6 +25,8 @@ payme-app-win32-x64
 *.njsproj
 *.sln
 *.sw?
+
+# Ignore .env files
 .env
 
 
