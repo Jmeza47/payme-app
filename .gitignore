@@ -13,6 +13,7 @@ dist
 dist-ssr
 *.local
 payme-app-win32-x64
+.env
 
 # Editor directories and files
 .vscode/*
