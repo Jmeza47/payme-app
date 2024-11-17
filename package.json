@@ -20,6 +20,7 @@
     "@firebase/auth": "^1.8.1",
     "@react-pdf/renderer": "^4.1.2",
     "@reduxjs/toolkit": "^2.2.7",
+    "@tanstack/react-query": "^5.60.5",
     "@types/react-redux": "^7.1.34",
     "antd": "^5.20.3",
     "dotenv": "^16.4.5",

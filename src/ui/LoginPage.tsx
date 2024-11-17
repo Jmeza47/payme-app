@@ -44,49 +44,76 @@ export default LoginPage;
 import { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase";
-import { Button, Card, Input, notification } from "antd";
+import { Button, Card, Form, Input, notification } from "antd";
+import { LockOutlined } from "@ant-design/icons";
+import useFormValidationBeforeSubmit from "../hooks/useFormValidateBeforeSubmit";
 
 function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
+  const { form, values } = useFormValidationBeforeSubmit();
 
   const handleLogin = async () => {
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      await signInWithEmailAndPassword(auth, values.email, values.password);
       notification.success({
         message: "Login Successful",
-        description: `Welcome, ${email}`,
+        description: `Bienvenido, ${values.email}`,
         type: "success",
         placement: "top",
       });
-      // Successful login, redirect or perform other actions
     } catch {
-      setError("Error al autentificar usuario/contrasena incorrecto");
+      setError("usuario/contrasena incorrecto");
     }
   };
 
   return (
-    <div className="w-dvw h-dvh flex justify-center items-center overflow-auto">
-      {error && <p>{error}</p>}
+    <div className="w-dvw h-dvh flex justify-center items-center overflow-auto bg-gradient-to-r from-slate-500 to-slate-800">
+      <Card className="w-1/4 h-fit flex flex-col justify-center">
+        <div className="space-y-8 flex flex-col items-center p-8">
+          <img src="./logo.png" width={80} />
+          <Form
+            form={form}
+            initialValues={{ email: "", password: "" }}
+            layout="vertical"
+            className="w-full"
+            onFinish={handleLogin}
+          >
+            <Form.Item
+              name="email"
+              rules={[
+                { required: true, message: "Por favor introduzca el correo" },
+              ]}
+            >
+              <Input
+                type="email"
+                placeholder="Correo electronico"
+                onChange={() => {
+                  setError(null);
+                }}
+              />
+            </Form.Item>
 
-      <Card className="w-1/6 h-1/3 flex flex-col justify-center">
-        <div className="space-y-8">
-          <Input
-            type="email"
-            placeholder="Correo electronico"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <Input
-            type="password"
-            placeholder="Contraseña"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <Button onClick={handleLogin} type="primary" className="w-full">
-            Ingresar
-          </Button>
+            <Form.Item
+              name="password"
+              rules={[{ required: true, message: "Por favor la contrasena" }]}
+            >
+              <Input
+                type="password"
+                placeholder="Contraseña"
+                prefix={<LockOutlined />}
+                onChange={() => {
+                  setError(null);
+                }}
+              />
+            </Form.Item>
+            <Form.Item>
+              <Button block type="primary" htmlType="submit">
+                Ingresar
+              </Button>
+            </Form.Item>
+          </Form>
+
+          {error && <p className=" text-red-600">{error}</p>}
         </div>
       </Card>
     </div>
