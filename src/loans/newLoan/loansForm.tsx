@@ -1,17 +1,20 @@
 import { Button, Form, InputNumber, Select } from "antd";
-import { useGetCustomers } from "../../customers/hooks/useGetCustomers";
 import { useGenerateWeeklyPayments } from "../hooks/useGenerateLoanPayments";
 import { PaymentsTable } from "../loansTables/paymentsTable";
 import useFormValidationBeforeSubmit from "../../hooks/useFormValidateBeforeSubmit";
-import { useCreateLoan } from "../hooks/useCreateLoan";
+//import { useCreateLoan } from "../hooks/useCreateLoan";
 import { ILoans, PaymentScheduleInput } from "../../common/types";
 import { useAppDispatch } from "../../hooks/useStore";
 import { setShowLoansModal } from "../loansSlice";
+import { useGetCustomers } from "../../customers/hooks/api/useGetCustomers";
+import { useCreateLoan } from "../hooks/api/useCreateLoan";
+import { v4 as uuidv4 } from "uuid";
 
 export default function LoansForm() {
-  const customers = useGetCustomers();
+  const { customers } = useGetCustomers();
   const { submittable, form, values } = useFormValidationBeforeSubmit();
-  const { handleCreateLoan } = useCreateLoan();
+  //const { handleCreateLoan } = useCreateLoan();
+  const { addNewLoan } = useCreateLoan();
   const dispatch = useAppDispatch();
   const { paymentSchedule, generatePaymentSchedule } =
     useGenerateWeeklyPayments();
@@ -23,6 +26,7 @@ export default function LoansForm() {
 
   const generatedPaymentSchedule: PaymentScheduleInput[] = paymentSchedule.map(
     (payment) => ({
+      _id: uuidv4(),
       paymentDate: payment.nextPaymentDate,
       amountPaid: payment.capitalWeekly,
       interestPaid: payment.interestWeekly,
@@ -36,10 +40,10 @@ export default function LoansForm() {
     const loanData: ILoans = {
       ...values,
       loanStatus: "active",
-      loanDate: new Date(),
+      loanDate: new Date().toISOString(),
       paymentSchedule: generatedPaymentSchedule,
     };
-    handleCreateLoan(loanData);
+    addNewLoan(loanData);
     dispatch(setShowLoansModal(false));
   };
 
@@ -54,7 +58,7 @@ export default function LoansForm() {
         name="customerId"
         rules={[{ required: true, message: "Por favor seleccione un cliente" }]}
       >
-        <Select options={options} showSearch />
+        <Select options={options} optionFilterProp="label" showSearch />
       </Form.Item>
       <div className="flex space-x-2 justify-around w-full">
         <Form.Item
@@ -113,21 +117,18 @@ export default function LoansForm() {
           name="loanTerm"
           rules={[{ required: true, message: "Por favor seleccione un plazo" }]}
         >
-          <Select
-            placeholder="Plazo en meses"
-            options={[
-              { value: 1, label: "1 Mes" },
-              { value: 2, label: "2 Meses" },
-              { value: 3, label: "3 Meses" },
-              { value: 4, label: "4 Meses" },
-              { value: 5, label: "5 Meses" },
-            ]}
-            onSelect={(term) => {
-              generatePaymentSchedule(
-                values.loanAmount,
-                values.loanInterest,
-                term
-              );
+          <InputNumber<number>
+            min={1}
+            step={1}
+            onChange={(loanTerm) => {
+              if (loanTerm !== undefined) {
+                const integerValue = Math.floor(loanTerm); // Ensure it's an integer
+                generatePaymentSchedule(
+                  values.loanAmount,
+                  values.loanInterest,
+                  integerValue
+                );
+              }
             }}
           />
         </Form.Item>

@@ -7,7 +7,6 @@ import {
   ActiveLoansCountWidget,
   LoansCountWidget,
   NewLoanButtonWidget,
-  TotalMoneyBorrowedWidget,
 } from "../loans/Widget/loansWidgets";
 import { Divider } from "antd";
 import {
@@ -55,19 +54,16 @@ export default function Home() {
       <div className="flex space-x-4">
         <div className="flex flex-col w-1/3 space-y-4">
           <Divider type="horizontal">Pagos</Divider>
-          <TotalMoneyToRecoverWidget />
+
           <div className="flex space-x-4">
-            <TotalMoneyBorrowedWidget />
+            <TotalMoneyToRecoverWidget />
             <InterestToEarnWidget />
           </div>
         </div>
 
-        <div className="flex flex-col w-2/3 space-y-4 ">
+        <div className="flex flex-col w-2/3 space-y-4 h-full ">
           <Divider type="horizontal">Pagos que vencen hoy</Divider>
-
-          <div className="flex space-x-4 ">
-            <TodayDuePayments />
-          </div>
+          <TodayDuePayments />
         </div>
       </div>
     </div>

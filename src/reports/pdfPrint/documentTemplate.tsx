@@ -117,7 +117,7 @@ export function DocumentTemplate({
             Cliente: {`${customer.name} ${customer.lastName}`}
           </Text>
           <Text style={styles.infoText}>Telefono #1: {customer.phone1}</Text>
-          <Text style={styles.infoText}>Telefono #2: {customer.phone2}</Text>
+          <Text style={styles.infoText}>Identidad: {customer.dni}</Text>
           <Text style={styles.infoText}>Direccion: {customer.address}</Text>
         </View>
 

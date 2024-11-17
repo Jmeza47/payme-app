@@ -34,9 +34,21 @@ const items: MenuItem[] = [
     icon: <SnippetsOutlined />,
   },
   {
-    key: "reports",
+    key: "reports1",
     label: "Reportes",
     icon: <AreaChartOutlined />,
+    children: [
+      {
+        key: "customers-reports",
+        label: "Clientes",
+        icon: <TeamOutlined />,
+      },
+      {
+        key: "incomes-reports",
+        label: "Ingresos",
+        icon: <TeamOutlined />,
+      },
+    ],
   },
 ];
 
@@ -51,7 +63,7 @@ export default function Sidebar() {
   return (
     <Menu
       onClick={onClick}
-      className="w-fit flex flex-col p-2 justify-center"
+      className="w-1/6 flex flex-col p-2 justify-center text-base "
       defaultSelectedKeys={["1"]}
       selectable
       defaultOpenKeys={["sub1"]}

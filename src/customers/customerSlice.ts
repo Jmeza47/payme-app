@@ -14,7 +14,7 @@ const initialState: ShowCreateCustomerModal = {
     name: "",
     lastName: "",
     phone1: "",
-    phone2: "",
+    dni: "",
     address: "",
     ref1: "",
     ref1Tel: "",

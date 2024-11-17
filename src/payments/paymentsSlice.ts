@@ -1,5 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { PaymentScheduleInput } from "../common/types";
+import dayjs from "dayjs";
 
 export interface paymentsSlice {
   setShowConfirmationPaymentModal: boolean;
@@ -10,7 +11,7 @@ const initialState: paymentsSlice = {
   setShowConfirmationPaymentModal: false,
   paymentInformation: {
     _id: "",
-    paymentDate: new Date(),
+    paymentDate: dayjs(new Date()).format("dddd DD/MM/YYYY"),
     amountPaid: 0,
     interestPaid: 0,
     dueDays: 0,

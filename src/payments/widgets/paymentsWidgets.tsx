@@ -1,6 +1,4 @@
 import { useMemo } from "react";
-//import { useGetCustomers } from "../../customers/hooks/useGetCustomers";
-import { useGetLoans } from "../../loans/hooks/useGetLoans";
 import { InformationWidget } from "../../ui/informationWidget";
 import { moneyFormatter } from "../../utils/moneyFormatter";
 import {
@@ -11,11 +9,13 @@ import {
   FireOutlined,
 } from "@ant-design/icons";
 import { Table } from "antd";
-import { useGetCustomers } from "../../customers/hooks/useGetCustomers";
+
 import dayjs from "dayjs";
+import { useGetCustomers } from "../../customers/hooks/api/useGetCustomers";
+import { useGetLoans } from "../../loans/hooks/api/useGetLoans";
 
 export function TotalMoneyRecoverWidget() {
-  const loans = useGetLoans();
+  const { loans } = useGetLoans();
 
   const totalPaidAmount = useMemo(() => {
     return loans.reduce((total, loan) => {
@@ -37,7 +37,7 @@ export function TotalMoneyRecoverWidget() {
 }
 
 export function TotalMoneyToRecoverWidget() {
-  const loans = useGetLoans();
+  const { loans } = useGetLoans();
 
   const totalPaidAmount = useMemo(() => {
     return loans.reduce((total, loan) => {
@@ -58,7 +58,7 @@ export function TotalMoneyToRecoverWidget() {
 }
 
 export function InterestEarnedWidget() {
-  const loans = useGetLoans();
+  const { loans } = useGetLoans();
 
   const totalPaidAmount = useMemo(() => {
     return loans.reduce((total, loan) => {
@@ -79,7 +79,7 @@ export function InterestEarnedWidget() {
 }
 
 export function InterestToEarnWidget() {
-  const loans = useGetLoans();
+  const { loans } = useGetLoans();
 
   const totalPaidAmount = useMemo(() => {
     return loans.reduce((total, loan) => {
@@ -102,7 +102,7 @@ export function InterestToEarnWidget() {
 }
 
 export function HistoricalMoneyLoanded() {
-  const loans = useGetLoans();
+  const { loans } = useGetLoans();
 
   const totalPaidAmount = useMemo(() => {
     return loans
@@ -120,8 +120,8 @@ export function HistoricalMoneyLoanded() {
 }
 
 export const TodayDuePayments = () => {
-  const loans = useGetLoans();
-  const customers = useGetCustomers();
+  const { loans } = useGetLoans();
+  const { customers } = useGetCustomers();
 
   // Map customer IDs to their names for easy lookup
   const customerNameMap = useMemo(() => {
@@ -136,7 +136,7 @@ export const TodayDuePayments = () => {
   const todayDuePayments = useMemo(() => {
     const today = dayjs();
     return loans
-      .filter((loan) => loan.loanStatus !== "PAID") // Exclude fully paid loans
+      .filter((loan) => loan.loanStatus !== "PAID")
       .flatMap((loan) =>
         loan.paymentSchedule
           .filter(
@@ -175,12 +175,14 @@ export const TodayDuePayments = () => {
 
   return (
     <Table
+      locale={{
+        emptyText: "No hay pagos pendientes, para hoy",
+      }}
+      pagination={{ pageSize: 5, simple: true }}
       columns={columns}
       dataSource={todayDuePayments}
-      pagination={{ defaultPageSize: 5 }}
-      style={{ minHeight: "250px" }}
       rowKey="dueDate"
-      className="w-full h-[280px]"
+      className="w-full bg-white rounded-md"
     />
   );
 };

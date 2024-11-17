@@ -4,7 +4,9 @@ import {
   EditOutlined,
   ExclamationCircleFilled,
 } from "@ant-design/icons";
-import { useDeleteCustomer } from "../hooks/useDeleteCustomer";
+//import { useDeleteCustomer } from "../hooks/useDeleteCustomer";
+
+import { useDeleteCustomer } from "../hooks/api/useDeleteCustomer";
 import { useAppDispatch } from "../../hooks/useStore";
 import {
   setIsEditing,
@@ -12,14 +14,18 @@ import {
   setEditingValues,
 } from "../customerSlice";
 import { ICustomer } from "../../common/types";
-import { useDeleteLoansByCustomer } from "../../loans/hooks/useDeleteLoansByCustomer";
+import { useDeleteLoansByCustomerId } from "../../loans/hooks/api/useDeleteLoansByCustomer";
+//import { useDeleteLoansByCustomer } from "../../loans/hooks/useDeleteLoansByCustomer";
 
 const { confirm } = Modal;
 
 export function RowActions({ customerRecord }: { customerRecord: ICustomer }) {
   const dispatch = useAppDispatch();
-  const { handleDeleteCustomer } = useDeleteCustomer();
-  const { handleDeleteLoansByCustomer } = useDeleteLoansByCustomer();
+
+  const { deleteCustomer } = useDeleteCustomer();
+  const { deleteLoansByCustomer } = useDeleteLoansByCustomerId();
+  //const { handleDeleteCustomer } = useDeleteCustomer();
+  //const { handleDeleteLoansByCustomer } = useDeleteLoansByCustomer();
 
   const handleEdit = () => {
     dispatch(setIsEditing(true));
@@ -29,19 +35,20 @@ export function RowActions({ customerRecord }: { customerRecord: ICustomer }) {
 
   const handleDelete = () => {
     if (customerRecord._id) {
-      handleDeleteCustomer(customerRecord._id);
-      handleDeleteLoansByCustomer(customerRecord._id);
+      deleteCustomer(customerRecord._id);
+      deleteLoansByCustomer(customerRecord._id);
     }
   };
 
   const showConfirm = () => {
     confirm({
-      title: "Eliminar Cliente?",
+      title: "Eliminar cliente?",
       icon: <ExclamationCircleFilled />,
       content:
         "Esta seguro que desea eliminar el cliente, esto eliminara toda la informacion relacionada con el cliente como creditos, pagos y reportes!",
       okText: "Eliminar",
       cancelText: "Cancelar",
+      type: "warning",
       onOk() {
         handleDelete();
       },
@@ -51,14 +58,8 @@ export function RowActions({ customerRecord }: { customerRecord: ICustomer }) {
   return (
     <App>
       <Space>
-        <Button type="primary" icon={<EditOutlined />} onClick={handleEdit} />
-
-        <Button
-          type="primary"
-          onClick={showConfirm}
-          danger
-          icon={<DeleteOutlined />}
-        />
+        <Button icon={<EditOutlined />} onClick={handleEdit} />
+        <Button onClick={showConfirm} danger icon={<DeleteOutlined />} />
       </Space>
     </App>
   );

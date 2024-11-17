@@ -1,9 +1,9 @@
 import { Modal } from "antd";
 import { useAppSelector, useAppDispatch } from "../../hooks/useStore";
 import { setShowConfirmationPaymentModal } from "../paymentsSlice";
-import { useUpdatePaymentStatus } from "../../loans/hooks/useUpdatePaymentStatus";
-import { useUpdateLoanStatus } from "../../loans/hooks/useUpdateLoanStatus";
-import { useGetLoans } from "../../loans/hooks/useGetLoans";
+import { useUpdateLoanStatus } from "../../loans/hooks/api/useUpdateLoanStatus";
+import { useUpdatePaymentStatus } from "../../loans/hooks/api/useUpdatePaymentStatus";
+import { useGetLoans } from "../../loans/hooks/api/useGetLoans";
 
 export default function ConfirmPaymentModal({
   loanId,
@@ -15,8 +15,8 @@ export default function ConfirmPaymentModal({
   const showModal = useAppSelector(
     (state) => state.payments.setShowConfirmationPaymentModal
   );
-  const loans = useGetLoans();
-  const { handleUpdateLoanStatus } = useUpdateLoanStatus();
+  const { loans } = useGetLoans();
+  const { updateLoanStatus } = useUpdateLoanStatus();
   const paymentSchedule = loans.find(
     (loan) => loan._id === loanId
   )?.paymentSchedule;
@@ -27,16 +27,16 @@ export default function ConfirmPaymentModal({
       paymentSchedule.every((payment) => payment.status === "PAID");
 
     if (allPaymentsPaid && loanId) {
-      handleUpdateLoanStatus(loanId, "PAID");
+      updateLoanStatus(loanId, "PAID");
     }
   };
-  const { handleUpdatePaymentStatus } = useUpdatePaymentStatus();
+  const { updatePaymentStatus } = useUpdatePaymentStatus();
   const dispatch = useAppDispatch();
 
   const onOk = () => {
-    handleUpdatePaymentStatus(loanId!, paymentId, "PAID");
+    updatePaymentStatus(loanId!, paymentId, "PAID");
     dispatch(setShowConfirmationPaymentModal(false));
-    handleUpdateLoan(); // Close the modal
+    handleUpdateLoan();
   };
 
   return (

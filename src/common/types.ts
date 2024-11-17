@@ -3,7 +3,7 @@ export interface ICustomer {
   name: string;
   lastName: string;
   phone1: string;
-  phone2?: string | undefined;
+  dni?: string;
   address: string;
   ref1: string;
   ref1Tel: string;
@@ -24,7 +24,7 @@ export interface ILoans {
 
 export type PaymentScheduleInput = {
   _id?: string;
-  paymentDate: Date;
+  paymentDate: string;
   amountPaid: number;
   interestPaid: number;
   dueDays: number;

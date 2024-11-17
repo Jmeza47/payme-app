@@ -1,18 +1,15 @@
 import { Button, Form, Input } from "antd";
 import { useNewCustomerForm } from "../hooks/useNewCustomerForm";
-import { useUpdateCustomer } from "../hooks/useUpdateCustomer";
+import { useUpdateCustomer } from "../hooks/api/useUpdateCustomer";
+import { useCreateCustomer } from "../hooks/api/useCreateCustomer";
 
 export default function NewCustomerForm() {
-  const {
-    submittable,
-    form,
-    values,
-    handleCreateCustomer,
-    isEditing,
-    editingValues,
-  } = useNewCustomerForm();
+  const { submittable, form, values, isEditing, editingValues } =
+    useNewCustomerForm();
 
-  const { handleUpdateCustomer } = useUpdateCustomer();
+  const { updateCustomer } = useUpdateCustomer();
+
+  const { addCustomer } = useCreateCustomer();
 
   return (
     <>
@@ -21,11 +18,13 @@ export default function NewCustomerForm() {
         form={form}
         onFinish={() =>
           isEditing
-            ? handleUpdateCustomer(editingValues._id!, values)
-            : handleCreateCustomer(values)
+            ? updateCustomer(editingValues._id!, values)
+            : addCustomer(values)
         }
         autoComplete="false"
-        initialValues={isEditing ? editingValues : undefined}
+        initialValues={
+          isEditing ? editingValues : { dni: "", ref2: "", ref2Tel: "" }
+        }
       >
         <div className="flex space-x-3">
           <Form.Item
@@ -91,25 +90,22 @@ export default function NewCustomerForm() {
             <Input placeholder="Ingrese el numero de telefono" />
           </Form.Item>
           <Form.Item
-            label="Telefono #2 (opcional)"
-            name="phone2"
+            label="Nº de Identidad"
+            name="dni"
             rules={[
               {
-                min: 9,
-                message: "El telefono require 9 caracteres",
+                required: true,
+                message: "Ingrese un numero de Identidad para el cliente!",
               },
               {
-                max: 9,
-                message: "El telefono require 9 caracteres",
-              },
-              {
-                pattern: /^(\d{4})-\d{4}$/,
-                message: "El telefono debe estar en el formato 1234 - 5678",
+                min: 15,
+                max: 15,
+                message: "El numero de identidad debe contener 13 caracteres",
               },
             ]}
             className="w-full"
           >
-            <Input placeholder="Ingrese el numero de telefono" />
+            <Input placeholder="Ingrese el numero de identidad" />
           </Form.Item>
         </div>
         <div>

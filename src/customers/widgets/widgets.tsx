@@ -1,7 +1,5 @@
 import { useMemo } from "react";
 import { InformationWidget } from "../../ui/informationWidget";
-import { useGetLoans } from "../../loans/hooks/useGetLoans";
-import { useGetCustomers } from "../hooks/useGetCustomers";
 import { Button, Card } from "antd";
 import { setShowCreateCustomerModal } from "../customerSlice";
 import {
@@ -11,14 +9,16 @@ import {
 } from "@ant-design/icons";
 import { useDispatch } from "react-redux";
 import AddOrEditCustomer from "../newCustomers/addOrEditCustomer";
+import { useGetCustomers } from "../hooks/api/useGetCustomers";
+import { useGetLoans } from "../../loans/hooks/api/useGetLoans";
 
 export function CustomersWithActiveCreditsWidget({
   width,
 }: {
   width?: string;
 }) {
-  const loans = useGetLoans();
-  const customers = useGetCustomers();
+  const { loans } = useGetLoans();
+  const { customers } = useGetCustomers();
 
   const activeCustomerCount = useMemo(() => {
     if (!loans) return 0;
@@ -44,7 +44,7 @@ export function CustomersWithActiveCreditsWidget({
 }
 
 export function TotalCustomersCountWidget({ width }: { width?: string }) {
-  const customers = useGetCustomers();
+  const { customers } = useGetCustomers();
   const totalCustomers = useMemo(() => customers.length, [customers]);
   return (
     <InformationWidget

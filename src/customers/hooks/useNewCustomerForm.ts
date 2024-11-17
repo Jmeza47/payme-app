@@ -1,10 +1,10 @@
 import { useAppSelector } from "../../hooks/useStore";
 import useFormValidationBeforeSubmit from "../../hooks/useFormValidateBeforeSubmit";
-import { useCreateCustomer } from "./useCreateCustomer";
+import { useCreateCustomer } from "./api/useCreateCustomer";
 
 export function useNewCustomerForm() {
   const { submittable, form, values } = useFormValidationBeforeSubmit();
-  const { handleCreateCustomer } = useCreateCustomer();
+  const { addCustomer } = useCreateCustomer();
 
   const isEditing = useAppSelector((state) => state.newCustomer.isEditing);
   const editingValues = useAppSelector(
@@ -15,7 +15,7 @@ export function useNewCustomerForm() {
     submittable,
     form,
     values,
-    handleCreateCustomer,
+    addCustomer,
     isEditing,
     editingValues,
   };

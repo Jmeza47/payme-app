@@ -1,5 +1,4 @@
 import { Button, Card } from "antd";
-import { useGetLoans } from "../hooks/useGetLoans";
 import { moneyFormatter } from "../../utils/moneyFormatter";
 import { AddOrEditLoan } from "../newLoan/addOrEditLoan";
 import { setShowLoansModal } from "../loansSlice";
@@ -13,9 +12,10 @@ import {
 } from "@ant-design/icons";
 import { useMemo } from "react";
 import { InformationWidget } from "../../ui/informationWidget";
+import { useGetLoans } from "../hooks/api/useGetLoans";
 
 export function LoansCountWidget() {
-  const loans = useGetLoans();
+  const { loans } = useGetLoans();
   return (
     <InformationWidget
       title="Creditos"
@@ -26,7 +26,7 @@ export function LoansCountWidget() {
 }
 
 export function ActiveLoansCountWidget() {
-  const loans = useGetLoans();
+  const { loans } = useGetLoans();
   return (
     <InformationWidget
       title="Activos"
@@ -40,11 +40,11 @@ export function ActiveLoansCountWidget() {
 }
 
 export function TotalMoneyBorrowedWidget() {
-  const loans = useGetLoans();
+  const { loans } = useGetLoans();
 
   return (
     <InformationWidget
-      title="Dinero Prestado"
+      title="Creditos activos"
       data={moneyFormatter(
         loans
           .filter((loan) => loan.loanStatus !== "PAID")
@@ -56,7 +56,7 @@ export function TotalMoneyBorrowedWidget() {
 }
 
 export function TotalInterestAccruedWidget() {
-  const loans = useGetLoans();
+  const { loans } = useGetLoans();
 
   const totalInterest = useMemo(() => {
     return moneyFormatter(
@@ -69,7 +69,7 @@ export function TotalInterestAccruedWidget() {
 
   return (
     <InformationWidget
-      title="Interes Acumulado"
+      title="Suma de intereses totales"
       data={totalInterest}
       icon={<PercentageOutlined style={{ color: "yellowgreen" }} />}
     />

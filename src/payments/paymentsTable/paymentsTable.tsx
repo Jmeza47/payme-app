@@ -10,13 +10,6 @@ import {
 import { moneyFormatter } from "../../utils/moneyFormatter";
 import ConfirmPaymentModal from "../modals/confirmPaymentModal";
 import { useAppDispatch } from "../../hooks/useStore";
-import {
-  HistoricalMoneyLoanded,
-  InterestEarnedWidget,
-  InterestToEarnWidget,
-  TotalMoneyRecoverWidget,
-  TotalMoneyToRecoverWidget,
-} from "../widgets/paymentsWidgets";
 import dayjs from "dayjs";
 import { useState } from "react";
 
@@ -41,15 +34,7 @@ export default function PaymentsTable({
   paidAmountTotal: number;
   paidInterestTotal: number;
   pendingPaymentsTotal: number;
-  paymentSchedule: readonly {
-    readonly _id: string;
-    readonly amountPaid: number;
-    readonly dueDays: number;
-    readonly extraInterest: number;
-    readonly interestPaid: number;
-    readonly paymentDate: string;
-    readonly status: string;
-  }[];
+  paymentSchedule: PaymentScheduleInput[];
   selectedPayment: string;
   setSelectedPayment: React.Dispatch<React.SetStateAction<string | null>>;
   setSelectedLoan: React.Dispatch<React.SetStateAction<string | null>>;
@@ -192,20 +177,13 @@ export default function PaymentsTable({
           columns={columns}
           dataSource={filteredPaymentSchedule}
           rowKey="_id"
-          pagination={{ defaultPageSize: 4 }}
+          pagination={{ defaultPageSize: 4, simple: true }}
         />
         <ConfirmPaymentModal
           loanId={selectedLoan}
           paymentId={selectedPayment}
         />
       </Card>
-      <div className="flex space-x-4">
-        <TotalMoneyRecoverWidget />
-        <TotalMoneyToRecoverWidget />
-        <InterestEarnedWidget />
-        <InterestToEarnWidget />
-        <HistoricalMoneyLoanded />
-      </div>
     </div>
   );
 }

@@ -1,7 +1,14 @@
-import { Card, DatePicker, Select, Table, Checkbox, Tag, Button } from "antd";
+import {
+  Card,
+  DatePicker,
+  Select,
+  Table,
+  Checkbox,
+  Tag,
+  Button,
+  Spin,
+} from "antd";
 import type { CheckboxProps } from "antd";
-import { useGetLoans } from "../loans/hooks/useGetLoans";
-import { useGetCustomers } from "../customers/hooks/useGetCustomers";
 import { useMemo, useState } from "react";
 import { moneyFormatter } from "../utils/moneyFormatter";
 import dayjs from "dayjs";
@@ -11,6 +18,8 @@ import { PDFDownloadLink } from "@react-pdf/renderer";
 import { DocumentTemplate } from "./pdfPrint/documentTemplate";
 import { ILoans } from "../common/types";
 import { DownloadOutlined } from "@ant-design/icons";
+import { useGetCustomers } from "../customers/hooks/api/useGetCustomers";
+import { useGetLoans } from "../loans/hooks/api/useGetLoans";
 
 dayjs.extend(isBetween);
 dayjs.locale("es");
@@ -18,8 +27,8 @@ dayjs.locale("es");
 const { RangePicker } = DatePicker;
 
 export default function ReportsMain() {
-  const loans = useGetLoans();
-  const customers = useGetCustomers();
+  const { customers, loading } = useGetCustomers();
+  const { loans } = useGetLoans();
 
   const [dateRange, setDateRange] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null);
@@ -92,7 +101,7 @@ export default function ReportsMain() {
       title: "Plazo",
       dataIndex: "loanTerm",
       key: "loanTerm",
-      render: (term) => (term > 1 ? `${term} Meses` : `${term} Mes`),
+      render: (term) => (term > 1 ? `${term} Semanas` : `${term} Semana`),
     },
     {
       title: "Estado",
@@ -181,6 +190,12 @@ export default function ReportsMain() {
     },
   ];
 
+  if (loading) {
+    return (
+      <Spin size="large" className="flex justify-center items-center h-full" />
+    );
+  }
+
   return (
     <div className="space-y-4">
       <Card title="Filtrar creditos" type="inner">
@@ -214,10 +229,12 @@ export default function ReportsMain() {
           columns={columns}
           dataSource={filteredLoans ? filteredLoans : []}
           rowKey={"_id"}
+          loading={loading}
           pagination={{ defaultPageSize: 5 }}
           expandable={{
             expandedRowRender: (loan) => (
               <Table
+                loading={loading}
                 columns={paymentScheduleColumns}
                 dataSource={loans ? loan.paymentSchedule : []}
                 rowKey={(record) => record._id}

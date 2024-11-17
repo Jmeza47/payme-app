@@ -1,6 +1,6 @@
 import { useState } from "react";
 export interface PaymentSchedule {
-  nextPaymentDate: Date; // Use string to store the formatted date
+  nextPaymentDate: string; // Use string to store the formatted date
   capitalWeekly: number;
   interestWeekly: number;
   totalPayment: number;
@@ -20,8 +20,9 @@ export function useGenerateWeeklyPayments() {
     monthlyInterestRate: number,
     loanDurationMonths: number
   ) => {
-    const totalWeeks = loanDurationMonths * 4; // Convert loan duration to weeks
+    const totalWeeks = loanDurationMonths; // Convert loan duration to weeks
     const capitalWeekly = parseFloat((loanAmount / totalWeeks).toPrecision(4)); // Weekly capital payment
+    console.log(loanAmount);
     const weeklyInterestRate = (monthlyInterestRate / 4).toFixed(2); // Convert monthly interest to weekly
     const interestWeekly =
       loanAmount *
@@ -36,7 +37,7 @@ export function useGenerateWeeklyPayments() {
       nextPaymentDate.setDate(startDate.getDate() + i * 7); // Set next payment to weekly intervals
 
       newSchedule.push({
-        nextPaymentDate: nextPaymentDate, // Use formatted date with Spanish day names
+        nextPaymentDate: nextPaymentDate.toISOString(), // Use formatted date with Spanish day names
         capitalWeekly,
         interestWeekly,
         totalPayment: capitalWeekly + interestWeekly,

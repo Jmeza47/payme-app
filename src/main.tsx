@@ -1,6 +1,3 @@
-import { RelayEnvironmentProvider } from "react-relay";
-import { RelayEnvironment } from "./RelayEnvironment";
-//import enviroment from "./RelayEnvironmentAWS.ts";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { Provider } from "react-redux";
@@ -13,6 +10,7 @@ import App from "./App.tsx";
 import Home from "./home/home.tsx";
 import ReportsMain from "./reports/reportsMain.tsx";
 import ErrorElement from "./ui/errorElement.tsx";
+import IncomesReports from "./reports/incomesReports.tsx";
 
 const router = createBrowserRouter([
   {
@@ -37,8 +35,12 @@ const router = createBrowserRouter([
         element: <PaymentsMain />,
       },
       {
-        path: "/reports",
+        path: "/customers-reports",
         element: <ReportsMain />,
+      },
+      {
+        path: "/incomes-reports",
+        element: <IncomesReports />,
       },
     ],
   },
@@ -46,10 +48,8 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <Provider store={store}>
-    <RelayEnvironmentProvider environment={RelayEnvironment}>
-      <React.StrictMode>
-        <RouterProvider router={router} />
-      </React.StrictMode>
-    </RelayEnvironmentProvider>
+    <React.StrictMode>
+      <RouterProvider router={router} />
+    </React.StrictMode>
   </Provider>
 );

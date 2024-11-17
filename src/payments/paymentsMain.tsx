@@ -1,19 +1,21 @@
-import { graphql } from "relay-runtime";
 import Payments from "./paymentsTable/payments";
-import { useLazyLoadQuery } from "react-relay";
-import { paymentsMainQuery } from "./__generated__/paymentsMainQuery.graphql";
-
-const getPaymentsQuery = graphql`
-  query paymentsMainQuery {
-    loansConnection(first: 100) @connection(key: "main_loansConnection") {
-      edges {
-        ...paymentsTable
-      }
-    }
-  }
-`;
+import {
+  InterestEarnedWidget,
+  InterestToEarnWidget,
+  TotalMoneyRecoverWidget,
+  TotalMoneyToRecoverWidget,
+} from "./widgets/paymentsWidgets";
 
 export default function PaymentsMain() {
-  const data = useLazyLoadQuery<paymentsMainQuery>(getPaymentsQuery, {});
-  return <Payments paymentsFragmentKey={data.loansConnection?.edges ?? null} />;
+  return (
+    <div className="space-y-4">
+      <Payments />
+      <div className="flex space-x-4">
+        <TotalMoneyRecoverWidget />
+        <InterestEarnedWidget />
+        <TotalMoneyToRecoverWidget />
+        <InterestToEarnWidget />
+      </div>
+    </div>
+  );
 }

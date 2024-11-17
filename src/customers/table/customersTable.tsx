@@ -1,49 +1,24 @@
-import { useGetCustomers } from "../hooks/useGetCustomersAWS";
 import { Table, Input, Card } from "antd";
 import { ICustomer } from "../../common/types";
 import { RowActions } from "./rowActions";
 import { useMemo, useState } from "react";
-//import { graphql } from "relay-runtime";
-import { customersTable$key } from "./__generated__/customersTable.graphql";
 import {
   CustomersWithActiveCreditsWidget,
   NewCustomerWidget,
   TotalCustomersCountWidget,
 } from "../widgets/widgets";
 
+import { useGetCustomers } from "../hooks/api/useGetCustomers";
+
 const { Search } = Input;
 
-type Props = {
-  customersFragmentKey: customersTable$key | null;
-};
-
-/*const customersFragment = graphql`
-  fragment customersTable on CustomerEdge @relay(plural: true) {
-    node {
-      _id
-      name
-      lastName
-      phone1
-      phone2
-      address
-      ref1
-      ref1Tel
-      ref2
-      ref2Tel
-    }
-  }
-`;*/
-
-export default function ShowCustomersTable({ customersFragmentKey }: Props) {
-  //const customers = useFragment(customersFragment, customersFragmentKey);
-  const customers = useGetCustomers();
+export default function ShowCustomersTable() {
+  const { customers, loading } = useGetCustomers();
   const [searchQuery, setSearchQuery] = useState("");
-
-  const isLoading = !customersFragmentKey || !customers;
 
   const filteredCustomers =
     customers?.filter((edge) => {
-      const customer = edge.node;
+      const customer = edge;
       if (!customer) return false;
 
       const fullName = `${customer.name} ${customer.lastName}`.toLowerCase();
@@ -66,6 +41,11 @@ export default function ShowCustomersTable({ customersFragmentKey }: Props) {
         title: "Apellido",
         dataIndex: "lastName",
         key: "lastName",
+      },
+      {
+        title: "Nº de Identidad",
+        dataIndex: "dni",
+        key: "dni",
       },
       {
         title: "Teléfono",
@@ -106,8 +86,8 @@ export default function ShowCustomersTable({ customersFragmentKey }: Props) {
       <Card title="Informacion de clientes">
         <Table
           columns={columns}
-          loading={isLoading}
-          dataSource={filteredCustomers.map((edge) => edge.node)}
+          loading={loading}
+          dataSource={filteredCustomers.map((edge) => edge)}
           pagination={{ pageSize: 5, simple: true }}
           rowKey="_id"
         />

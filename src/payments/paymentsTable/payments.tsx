@@ -1,45 +1,17 @@
 import { useState, useMemo, useEffect } from "react";
-import { useGetCustomers } from "../../customers/hooks/useGetCustomers";
-import { graphql } from "relay-runtime";
-import { useFragment } from "react-relay";
-import { useUpdateLoanStatus } from "../../loans/hooks/useUpdateLoanStatus";
-import { paymentsTable$key } from "./__generated__/paymentsTable.graphql";
 import PaymentsTable from "./paymentsTable";
 import dayjs from "dayjs";
-import { useUpdatePaymentDueDays } from "../../loans/hooks/useUpdatePaymentDueDays";
+import { useGetCustomers } from "../../customers/hooks/api/useGetCustomers";
+import { useUpdateLoanStatus } from "../../loans/hooks/api/useUpdateLoanStatus";
+import { useGetLoans } from "../../loans/hooks/api/useGetLoans";
+import { useUpdatePaymentDueDays } from "../../loans/hooks/api/useUpdatePaymentDueDays";
+import { moneyFormatter } from "../../utils/moneyFormatter";
 
-type Props = {
-  paymentsFragmentKey: paymentsTable$key | null;
-};
-
-const paymentsFragment = graphql`
-  fragment paymentsTable on LoanEdge @relay(plural: true) {
-    node {
-      _id
-      customerId
-      loanAmount
-      loanInterest
-      loanTerm
-      loanStatus
-      loanDate
-      paymentSchedule {
-        _id
-        paymentDate
-        amountPaid
-        interestPaid
-        dueDays
-        extraInterest
-        status
-      }
-    }
-  }
-`;
-
-export default function Payments({ paymentsFragmentKey }: Props) {
-  const loans = useFragment(paymentsFragment, paymentsFragmentKey);
-  const customers = useGetCustomers();
-  const { handleUpdateLoanStatus } = useUpdateLoanStatus();
-  const { handleUpdatePaymentDueDays } = useUpdatePaymentDueDays();
+export default function Payments() {
+  const { loans } = useGetLoans();
+  const { customers } = useGetCustomers();
+  const { updateLoanStatus } = useUpdateLoanStatus();
+  const { updatePaymentDueDays } = useUpdatePaymentDueDays();
 
   const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null);
   const [selectedLoan, setSelectedLoan] = useState<string | null>(null);
@@ -57,27 +29,25 @@ export default function Payments({ paymentsFragmentKey }: Props) {
 
   const filteredLoans = useMemo(() => {
     return selectedCustomer
-      ? loans!.filter((loan) => loan?.node?.customerId === selectedCustomer)
+      ? loans!.filter((loan) => loan?.customerId === selectedCustomer)
       : [];
   }, [selectedCustomer, loans]);
 
   const loansOptions = useMemo(() => {
-    return filteredLoans.map((loan) => ({
-      value: loan?.node?._id,
-      label: `Fecha: ${dayjs(loan?.node?.loanDate).format(
-        "DD/MM/YYYY"
-      )} --- Capital: L.${loan?.node?.loanAmount} --- ${
-        loan.node.loanStatus === "PAID" ? "Pagado" : "Activo"
-      }`,
-      key: loan?.node?._id,
-    }));
+    return filteredLoans
+      .filter((loan) => loan.loanStatus !== "PAID")
+      .map((loan) => ({
+        value: loan?._id,
+        label: `Fecha: ${dayjs(loan?.loanDate).format(
+          "DD/MM/YYYY"
+        )} --- Capital: ${moneyFormatter(loan?.loanAmount)}`,
+        key: loan?._id,
+      }));
   }, [filteredLoans]);
 
   const paymentSchedule = useMemo(() => {
-    const selectedLoanData = loans?.find(
-      (loan) => loan?.node?._id === selectedLoan
-    );
-    return selectedLoanData?.node?.paymentSchedule || [];
+    const selectedLoanData = loans?.find((loan) => loan?._id === selectedLoan);
+    return selectedLoanData?.paymentSchedule || [];
   }, [selectedLoan, loans]);
 
   const paidAmountTotal = useMemo(() => {
@@ -105,23 +75,19 @@ export default function Payments({ paymentsFragmentKey }: Props) {
 
     paymentSchedule.forEach((payment) => {
       const paymentDate = dayjs(payment.paymentDate);
+
       const dueDays = paymentDate.isBefore(today)
         ? today.diff(paymentDate, "day")
         : 0;
-      const extraInterest =
-        dueDays > 0 ? dueDays * 0.1 * payment.amountPaid : 0;
 
-      if (
-        payment.dueDays > 0 &&
-        dueDays !== payment.dueDays &&
-        payment.status === "ACTIVE"
-      ) {
-        handleUpdatePaymentDueDays(
-          selectedLoan,
-          payment._id,
-          dueDays,
-          extraInterest
-        );
+      const extraInterest =
+        dueDays > 0
+          ? dueDays * 0.1 * (payment.amountPaid + payment.interestPaid)
+          : 0;
+
+      if (dueDays !== payment.dueDays && payment.status === "ACTIVE") {
+        console.log("todo activo");
+        updatePaymentDueDays(selectedLoan, payment._id, dueDays, extraInterest);
       }
     });
   }, [paymentSchedule]);
@@ -132,13 +98,13 @@ export default function Payments({ paymentsFragmentKey }: Props) {
         (payment) => payment.status === "PAID"
       );
       const currentLoanStatus = loans?.find(
-        (loan) => loan?.node?._id === selectedLoan
-      )?.node?.loanStatus;
+        (loan) => loan?._id === selectedLoan
+      )?.loanStatus;
       if (allPaid && currentLoanStatus !== "PAID") {
-        handleUpdateLoanStatus(selectedLoan, "PAID"); // Update loan status to PAID
+        updateLoanStatus(selectedLoan, "PAID"); // Update loan status to PAID
       }
     }
-  }, [paymentSchedule, selectedLoan, loans, handleUpdateLoanStatus]);
+  }, [paymentSchedule, selectedLoan, loans, updateLoanStatus]);
 
   return (
     <PaymentsTable

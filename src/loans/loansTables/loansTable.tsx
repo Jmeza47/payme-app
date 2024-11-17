@@ -1,128 +1,92 @@
 import { Card, Input, Table, Tag } from "antd";
 import { ILoans } from "../../common/types";
-import { useGetCustomers } from "../../customers/hooks/useGetCustomers";
 import { useMemo, useState } from "react";
-import dayjs from "dayjs";
-import { graphql, useFragment } from "react-relay";
-import { loansTable$key } from "./__generated__/loansTable.graphql";
 import { moneyFormatter } from "../../utils/moneyFormatter";
 import { NewLoanButtonWidget } from "../Widget/loansWidgets";
+import { useGetCustomers } from "../../customers/hooks/api/useGetCustomers";
+import { useGetLoans } from "../hooks/api/useGetLoans";
+import dayjs from "dayjs";
 
-type Props = {
-  loansFragmentKey: loansTable$key | null;
-};
-
-const loansFragment = graphql`
-  fragment loansTable on LoanEdge @relay(plural: true) {
-    node {
-      _id
-      customerId
-      loanAmount
-      loanInterest
-      loanTerm
-      loanStatus
-      loanDate
-      paymentSchedule {
-        _id
-        paymentDate
-        amountPaid
-        interestPaid
-        dueDays
-        extraInterest
-        status
-      }
-    }
-  }
-`;
-
-export default function ShowLoansTable({ loansFragmentKey }: Props) {
-  const loans = useFragment(loansFragment, loansFragmentKey);
-  const customers = useGetCustomers();
+export default function ShowLoansTable() {
+  const { customers, loading: customerLoading } = useGetCustomers();
+  const { loans, loading: loansLoading } = useGetLoans();
 
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { Search } = Input;
+  const loading = customerLoading || loansLoading;
 
-  const customerNameMap = customers.reduce((acc, customer) => {
-    acc[customer!._id] = `${customer?.name} ${customer?.lastName}`;
-    return acc;
-  }, {} as Record<string, string>);
-  const filteredLoans = useMemo(
-    () =>
-      loans
-        ?.map((edge) => edge.node)
-        .filter(
-          (loan) =>
-            loan &&
-            customerNameMap[loan.customerId] &&
-            customerNameMap[loan.customerId]
-              .toLowerCase()
-              .includes(searchQuery.toLowerCase())
-        ) ?? [],
-    [loans, searchQuery, customerNameMap]
-  );
+  const customerNameMap = useMemo(() => {
+    if (!customers || customers.length === 0) return {};
+    return customers.reduce((acc, customer) => {
+      acc[customer._id] = `${customer.name} ${customer.lastName}`;
+      return acc;
+    }, {} as Record<string, string>);
+  }, [customers]);
+
+  const filteredLoans = useMemo(() => {
+    if (!loans || !customers) return [];
+    return loans.filter((loan) => {
+      const customerName = customerNameMap[loan.customerId] || "";
+      return customerName.toLowerCase().includes(searchQuery.toLowerCase());
+    });
+  }, [loans, searchQuery, customerNameMap]);
 
   const calculateTotalAmount = (loanAmount: number, loanInterest: number) => {
     return loanAmount * (loanInterest / 100) + loanAmount;
   };
 
-  const columns = useMemo(
-    () => [
-      {
-        title: "Fecha de Prestamo",
-        dataIndex: "loanDate",
-        key: "loanDate",
-        render: (loanDate) => (
-          <p>{dayjs(loanDate).format("dddd DD/MM/YYYY")}</p>
-        ),
+  const columns = [
+    {
+      title: "Fecha de Prestamo",
+      dataIndex: "loanDate",
+      key: "loanDate",
+      render: (loanDate) => <p>{dayjs(loanDate).format("dddd DD/MM/YYYY")}</p>,
+    },
+    {
+      title: "Cliente",
+      dataIndex: "customerId",
+      key: "customerId",
+      render: (customerId: string) => customerNameMap[customerId] || "N/A",
+    },
+    {
+      title: "Capital",
+      dataIndex: "loanAmount",
+      key: "loanAmount",
+      render: (loanAmount: number) => <p>{moneyFormatter(loanAmount)}</p>,
+    },
+    {
+      title: "Interes",
+      dataIndex: "loanInterest",
+      key: "loanInterest",
+      render: (loanInterest: number) => <p>{loanInterest}%</p>,
+    },
+    {
+      title: "Plazo",
+      dataIndex: "loanTerm",
+      key: "loanTerm",
+      render: (loanTerm: number) => (
+        <p>{loanTerm < 2 ? `${loanTerm} Semana` : `${loanTerm} Semanas`}</p>
+      ),
+    },
+    {
+      title: "Total",
+      key: "total",
+      render: (row: ILoans) => {
+        const total = calculateTotalAmount(row.loanAmount, row.loanInterest);
+        return <p>{moneyFormatter(total)}</p>;
       },
-      {
-        title: "Cliente",
-        dataIndex: "customerId",
-        key: "customerId",
-        render: (customerId: string) => customerNameMap[customerId], // Assuming customerId is a valid customer id
-      },
-      {
-        title: "Capital",
-        dataIndex: "loanAmount",
-        key: "loanAmount",
-        render: (loanAmount: number) => <p>{moneyFormatter(loanAmount)}</p>,
-      },
-      {
-        title: "Interes",
-        dataIndex: "loanInterest",
-        key: "loanInterest",
-        render: (loanInterest: number) => <p>{loanInterest}%</p>,
-      },
-      {
-        title: "Plazo",
-        dataIndex: "loanTerm",
-        key: "loanTerm",
-        render: (loanTerm: number) => (
-          <p>{loanTerm < 2 ? `${loanTerm} Mes` : `${loanTerm} Meses`}</p>
-        ),
-      },
-      {
-        title: "Total",
-        key: "total",
-        render: (row: ILoans) => {
-          const total = calculateTotalAmount(row.loanAmount, row.loanInterest);
-          return <p>{`${moneyFormatter(total)}`}</p>;
-        },
-      },
-      {
-        title: "Estado del prestamo",
-        dataIndex: "loanStatus",
-        key: "loanStatus",
-        render: (loanStatus: string) => (
-          <Tag color={loanStatus === "active" ? "green" : "red"}>
-            {loanStatus === "active" ? "Activo" : "Pagado"}
-          </Tag>
-        ),
-      },
-    ],
-    []
-  );
+    },
+    {
+      title: "Estado del prestamo",
+      dataIndex: "loanStatus",
+      key: "loanStatus",
+      render: (loanStatus: string) => (
+        <Tag color={loanStatus === "active" ? "green" : "red"}>
+          {loanStatus === "active" ? "Activo" : "Pagado"}
+        </Tag>
+      ),
+    },
+  ];
 
   return (
     <div className="space-y-4 w-full">
@@ -133,11 +97,15 @@ export default function ShowLoansTable({ loansFragmentKey }: Props) {
           type="inner"
           className="w-full"
         >
-          <Search onChange={(e) => setSearchQuery(e.target.value)} />
+          <Input.Search
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Buscar cliente"
+          />
         </Card>
       </div>
       <Card title="Informacion de prestamos" type="inner">
         <Table
+          loading={loading}
           columns={columns}
           dataSource={filteredLoans}
           rowKey="_id"

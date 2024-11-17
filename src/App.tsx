@@ -1,13 +1,13 @@
 import { Outlet } from "react-router-dom";
 import "./App.css";
 import Sidebar from "./routes/sidebar";
-import { ConfigProvider } from "antd";
+import { Button, ConfigProvider, Spin } from "antd";
 import { useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import esES from "antd/locale/es_ES";
-import { Amplify } from "aws-amplify";
-import config from "./aws-exports";
-Amplify.configure(config);
+import { onAuthStateChanged } from "@firebase/auth";
+import LoginPage from "./ui/LoginPage";
+import { auth } from "./firebase";
 
 type PathInfo = {
   title: string;
@@ -35,8 +35,13 @@ const pathMap: { [key: string]: PathInfo } = {
     description:
       "Informacion sobre pagos, fechas de pago, plazos, intereses y realize pagos.",
   },
-  "/reports": {
-    title: "Reportes",
+  "/customers-reports": {
+    title: "Reporte de clientes",
+    description:
+      "Vea Informacion sobre pagos, cree y descargue reportes sobre creditos.",
+  },
+  "/incomes-reports": {
+    title: "Reporte de ingresos",
     description:
       "Vea Informacion sobre pagos, cree y descargue reportes sobre creditos.",
   },
@@ -50,6 +55,9 @@ export default function App() {
       "Informacion sobre Creditos, Clientes, Pagos y accesos directos.",
   });
 
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     setPathInfo(pathMap[pathname] ?? { title: "Inicio", description: "" });
   }, [pathname]);
@@ -62,12 +70,41 @@ export default function App() {
     description: string;
   }) => {
     return (
-      <div className="h-24 p-4 bg-white">
-        <p className="font-bold text-2xl">{path}</p>
-        <p>{description}</p>
+      <div className="h-24 py-4 px-12 bg-white flex justify-between items-center">
+        <div>
+          <p className="font-bold text-2xl">{path}</p>
+          <p>{description}</p>
+        </div>
+        <Button onClick={() => auth.signOut()} type="primary">
+          Cerrar Sesion
+        </Button>
       </div>
     );
   };
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="w-dvw h-dvh">
+        <Spin
+          size="large"
+          className="flex justify-center items-center h-full"
+        />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <LoginPage />;
+  }
 
   return (
     <ConfigProvider
@@ -83,7 +120,7 @@ export default function App() {
         },
       }}
     >
-      <div className="  flex flex-row h-svh overflow-y-auto">
+      <div className="  flex flex-row  h-svh overflow-y-auto">
         <Sidebar />
 
         <div className=" overflow-y-auto w-full bg-gray-100">
