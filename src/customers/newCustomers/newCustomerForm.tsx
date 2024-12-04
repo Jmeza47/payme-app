@@ -23,7 +23,9 @@ export default function NewCustomerForm() {
         }
         autoComplete="false"
         initialValues={
-          isEditing ? editingValues : { dni: "", ref2: "", ref2Tel: "" }
+          isEditing
+            ? editingValues
+            : { dni: "", ref2: "", ref2Tel: "", ref1: "", ref1Tel: "" }
         }
       >
         <div className="flex space-x-3">
@@ -137,10 +139,6 @@ export default function NewCustomerForm() {
             name="ref1"
             rules={[
               {
-                required: true,
-                message: "Ingrese un nombre/s de la referencia!",
-              },
-              {
                 min: 3,
                 message: "El nombre debe de tener un minimo de 3 caracteres",
               },
@@ -153,10 +151,6 @@ export default function NewCustomerForm() {
             label="Telefono Referencia #1"
             name="ref1Tel"
             rules={[
-              {
-                required: true,
-                message: "Ingrese el telefono de la referencia!",
-              },
               {
                 min: 9,
                 message: "El telefono require 9 caracteres",

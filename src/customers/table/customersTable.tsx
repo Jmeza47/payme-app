@@ -1,7 +1,7 @@
-import { Table, Input, Card } from "antd";
+import { Table, Input, Card, TableColumnsType } from "antd";
 import { ICustomer } from "../../common/types";
 import { RowActions } from "./rowActions";
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   CustomersWithActiveCreditsWidget,
   NewCustomerWidget,
@@ -11,6 +11,15 @@ import {
 import { useGetCustomers } from "../hooks/api/useGetCustomers";
 
 const { Search } = Input;
+
+interface DataType {
+  name: string;
+  lastName: string;
+  address: string;
+  dni: string;
+  phone1: string;
+  options: React.Component;
+}
 
 export default function ShowCustomersTable() {
   const { customers, loading } = useGetCustomers();
@@ -30,12 +39,16 @@ export default function ShowCustomersTable() {
       );
     }) || [];
 
-  const columns = useMemo(
+  const columns: TableColumnsType<DataType> = useMemo(
     () => [
       {
         title: "Nombre",
         dataIndex: "name",
         key: "name",
+        sorter: (a, b) => b.name.localeCompare(a.name),
+        sortOrder: { order: "ascend", columnKey: "name" },
+        sortIcon: () => null,
+        showSorterTooltip: false,
       },
       {
         title: "Apellido",

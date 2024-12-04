@@ -44,11 +44,13 @@ export default function ReportsMain() {
 
   const customerOptions = useMemo(
     () =>
-      customers.map((customer) => ({
-        value: customer?._id,
-        label: `${customer?.name} ${customer?.lastName}`,
-        key: customer?._id,
-      })),
+      customers
+        .map((customer) => ({
+          value: customer?._id,
+          label: `${customer?.name} ${customer?.lastName}`,
+          key: customer?._id,
+        }))
+        .sort((a, b) => a.label.localeCompare(b.label)),
     [customers]
   );
 
@@ -232,7 +234,7 @@ export default function ReportsMain() {
           loading={loading}
           pagination={{ defaultPageSize: 5 }}
           expandable={{
-            expandedRowRender: (loan) => (
+            expandedRowRender: (loan: ILoans) => (
               <Table
                 loading={loading}
                 columns={paymentScheduleColumns}

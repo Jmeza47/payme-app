@@ -22,7 +22,6 @@ export function useGenerateWeeklyPayments() {
   ) => {
     const totalWeeks = loanDurationMonths; // Convert loan duration to weeks
     const capitalWeekly = parseFloat((loanAmount / totalWeeks).toPrecision(4)); // Weekly capital payment
-    console.log(loanAmount);
     const weeklyInterestRate = (monthlyInterestRate / 4).toFixed(2); // Convert monthly interest to weekly
     const interestWeekly =
       loanAmount *

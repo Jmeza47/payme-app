@@ -1,4 +1,4 @@
-import { Card, Input, Table, Tag } from "antd";
+import { Card, Input, Table, TableColumnsType, Tag } from "antd";
 import { ILoans } from "../../common/types";
 import { useMemo, useState } from "react";
 import { moneyFormatter } from "../../utils/moneyFormatter";
@@ -35,11 +35,14 @@ export default function ShowLoansTable() {
     return loanAmount * (loanInterest / 100) + loanAmount;
   };
 
-  const columns = [
+  const columns: TableColumnsType<ILoans> = [
     {
       title: "Fecha de Prestamo",
       dataIndex: "loanDate",
       key: "loanDate",
+      sorter: (a, b) => b.loanDate.localeCompare(a.loanDate),
+      defaultSortOrder: "descend",
+      showSorterTooltip: false,
       render: (loanDate) => <p>{dayjs(loanDate).format("dddd DD/MM/YYYY")}</p>,
     },
     {

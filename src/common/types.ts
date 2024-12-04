@@ -3,10 +3,10 @@ export interface ICustomer {
   name: string;
   lastName: string;
   phone1: string;
-  dni?: string;
+  dni: string;
   address: string;
-  ref1: string;
-  ref1Tel: string;
+  ref1?: string;
+  ref1Tel?: string;
   ref2?: string | undefined;
   ref2Tel?: string;
 }

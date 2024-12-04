@@ -70,7 +70,7 @@ export default function PaymentsTable({
       title: "Interes",
       dataIndex: "interestPaid",
       key: "interestPaid",
-      render: (interest: string) => <p>{`L.${interest}`}</p>,
+      render: (interest: number) => <p>{moneyFormatter(interest)}</p>,
     },
     {
       title: "Dias Vencidos",
@@ -83,6 +83,17 @@ export default function PaymentsTable({
       dataIndex: "extraInterest",
       key: "extraInterest",
       render: (extraInteres: number) => <p>{moneyFormatter(extraInteres)}</p>,
+    },
+    {
+      title: "Total",
+      key: "total",
+      render: (paymen: PaymentScheduleInput) => (
+        <p>
+          {moneyFormatter(
+            paymen.amountPaid + paymen.interestPaid + paymen.extraInterest
+          )}
+        </p>
+      ),
     },
     {
       title: "Estado",
@@ -177,7 +188,11 @@ export default function PaymentsTable({
           columns={columns}
           dataSource={filteredPaymentSchedule}
           rowKey="_id"
-          pagination={{ defaultPageSize: 4, simple: true }}
+          pagination={{
+            defaultPageSize: 4,
+            simple: true,
+            showSizeChanger: false,
+          }}
         />
         <ConfirmPaymentModal
           loanId={selectedLoan}

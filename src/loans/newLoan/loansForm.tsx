@@ -19,10 +19,12 @@ export default function LoansForm() {
   const { paymentSchedule, generatePaymentSchedule } =
     useGenerateWeeklyPayments();
 
-  const options = customers.map((customer) => ({
-    value: customer?._id,
-    label: `${customer?.name} ${customer?.lastName}`,
-  }));
+  const options = customers
+    .map((customer) => ({
+      value: customer?._id,
+      label: `${customer?.name} ${customer?.lastName}`,
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label));
 
   const generatedPaymentSchedule: PaymentScheduleInput[] = paymentSchedule.map(
     (payment) => ({
@@ -96,6 +98,7 @@ export default function LoansForm() {
             },
           ]}
         >
+          {/*
           <Select
             placeholder="Taza de interes"
             options={[
@@ -110,6 +113,22 @@ export default function LoansForm() {
               );
             }}
           />
+          */}
+          <InputNumber<number>
+            min={0}
+            step={1}
+            formatter={(value) => `${value}`.replace(/$/, "%")}
+            onChange={(loanInterest) => {
+              if (loanInterest !== undefined) {
+                const integerValue = Math.floor(loanInterest); // Ensure it's an integer
+                generatePaymentSchedule(
+                  values.loanAmount,
+                  integerValue,
+                  values.loanTerm
+                );
+              }
+            }}
+          />
         </Form.Item>
 
         <Form.Item
@@ -117,20 +136,22 @@ export default function LoansForm() {
           name="loanTerm"
           rules={[{ required: true, message: "Por favor seleccione un plazo" }]}
         >
-          <InputNumber<number>
-            min={1}
-            step={1}
-            onChange={(loanTerm) => {
-              if (loanTerm !== undefined) {
-                const integerValue = Math.floor(loanTerm); // Ensure it's an integer
-                generatePaymentSchedule(
-                  values.loanAmount,
-                  values.loanInterest,
-                  integerValue
-                );
-              }
-            }}
-          />
+          <>
+            <InputNumber<number>
+              min={1}
+              step={1}
+              onChange={(loanTerm) => {
+                if (loanTerm !== undefined) {
+                  const integerValue = Math.floor(loanTerm); // Ensure it's an integer
+                  generatePaymentSchedule(
+                    values.loanAmount,
+                    values.loanInterest,
+                    integerValue
+                  );
+                }
+              }}
+            />
+          </>
         </Form.Item>
       </div>
 

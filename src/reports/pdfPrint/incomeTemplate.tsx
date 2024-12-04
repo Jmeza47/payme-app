@@ -10,7 +10,7 @@ import logo from "../../assets/logo.png";
 import dayjs from "dayjs";
 import { moneyFormatter } from "../../utils/moneyFormatter";
 import { useMemo } from "react";
-import { useGetCustomers } from "../../customers/hooks/api/useGetCustomers";
+import { ICustomer } from "../../common/types";
 
 const styles = StyleSheet.create({
   body: {
@@ -64,12 +64,16 @@ const styles = StyleSheet.create({
   },
 });
 
-export function IncomeTemplate({ data }: { data: any[] }) {
+export function IncomeTemplate({
+  data,
+  customers,
+}: {
+  data: Array<any>;
+  customers: ICustomer[];
+}) {
   if (!data || !data.length) {
-    return null;
+    return <div>No data available for the report.</div>;
   }
-
-  const { customers } = useGetCustomers();
 
   // Calculate summary values
   const summary = {
