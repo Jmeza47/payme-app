@@ -2,6 +2,7 @@ import { Button, Form, Input } from "antd";
 import { useNewCustomerForm } from "../hooks/useNewCustomerForm";
 import { useUpdateCustomer } from "../hooks/api/useUpdateCustomer";
 import { useCreateCustomer } from "../hooks/api/useCreateCustomer";
+import { useEffect } from "react";
 
 export default function NewCustomerForm() {
   const { submittable, form, values, isEditing, editingValues } =
@@ -11,16 +12,31 @@ export default function NewCustomerForm() {
 
   const { addCustomer } = useCreateCustomer();
 
+  useEffect(() => {
+    return () => {
+      form.resetFields();
+    };
+  }, [form]);
+
+  const handleFinish = async () => {
+    try {
+      if (isEditing) {
+        await updateCustomer(editingValues._id!, values);
+      } else {
+        await addCustomer(values);
+      }
+    } catch (error) {
+      console.error("Error occurred:", error);
+      // Display error notification here
+    }
+  };
+
   return (
     <>
       <Form
         layout="vertical"
         form={form}
-        onFinish={() =>
-          isEditing
-            ? updateCustomer(editingValues._id!, values)
-            : addCustomer(values)
-        }
+        onFinish={handleFinish}
         autoComplete="false"
         initialValues={
           isEditing

@@ -45,7 +45,7 @@ import { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase";
 import { Button, Card, Form, Input, notification } from "antd";
-import { LockOutlined } from "@ant-design/icons";
+import { LockOutlined, MailOutlined } from "@ant-design/icons";
 import useFormValidationBeforeSubmit from "../hooks/useFormValidateBeforeSubmit";
 
 function Login() {
@@ -87,6 +87,7 @@ function Login() {
               <Input
                 type="email"
                 placeholder="Correo electronico"
+                prefix={<MailOutlined />}
                 onChange={() => {
                   setError(null);
                 }}

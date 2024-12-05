@@ -11,7 +11,9 @@ import { moneyFormatter } from "../../utils/moneyFormatter";
 import ConfirmPaymentModal from "../modals/confirmPaymentModal";
 import { useAppDispatch } from "../../hooks/useStore";
 import dayjs from "dayjs";
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+
+dayjs.locale("es");
 
 export default function PaymentsTable({
   loansOptions,
@@ -44,13 +46,15 @@ export default function PaymentsTable({
 
   const [showOnlyActive, setShowOnlyActive] = useState(false);
 
-  const handleStatusFilterChange = (e) => {
+  const handleStatusFilterChange = useCallback((e) => {
     setShowOnlyActive(e.target.checked);
-  };
+  }, []);
 
-  const filteredPaymentSchedule = showOnlyActive
-    ? paymentSchedule.filter((payment) => payment.status === "ACTIVE")
-    : paymentSchedule;
+  const filteredPaymentSchedule = useMemo(() => {
+    return showOnlyActive
+      ? paymentSchedule.filter((payment) => payment.status === "ACTIVE")
+      : paymentSchedule;
+  }, [showOnlyActive, paymentSchedule]);
 
   const columns = [
     {
@@ -64,7 +68,7 @@ export default function PaymentsTable({
       title: "Capital",
       dataIndex: "amountPaid",
       key: "amountPaid",
-      render: (amount: string) => <p>{`L.${amount}`}</p>,
+      render: (amount: number) => <p>{moneyFormatter(amount)}</p>,
     },
     {
       title: "Interes",
@@ -134,7 +138,9 @@ export default function PaymentsTable({
               placeholder="Seleccionar Cliente"
               showSearch
               optionFilterProp="label"
-              options={customerOptions}
+              options={customerOptions.sort((a, b) =>
+                a.label.localeCompare(b.label)
+              )}
               onChange={(value) => {
                 if (value !== selectedCustomer) {
                   setSelectedCustomer(value);

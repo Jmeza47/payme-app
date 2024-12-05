@@ -1,16 +1,20 @@
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import ReactDOM from "react-dom/client";
 import { Provider } from "react-redux";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import store from "./store/store.ts";
-import CustomerMainScreen from "./customers/customersMain.tsx";
-import LoansMain from "./loans/loansMain.tsx";
-import PaymentsMain from "./payments/paymentsMain.tsx";
 import App from "./App.tsx";
-import Home from "./home/home.tsx";
-import ReportsMain from "./reports/reportsMain.tsx";
 import ErrorElement from "./ui/errorElement.tsx";
-import IncomesReports from "./reports/incomesReports.tsx";
+
+// Lazy load route components
+const Home = lazy(() => import("./home/home.tsx"));
+const CustomerMainScreen = lazy(() => import("./customers/customersMain.tsx"));
+const LoansMain = lazy(() => import("./loans/loansMain.tsx"));
+const PaymentsMain = lazy(() => import("./payments/paymentsMain.tsx"));
+const ReportsMain = lazy(() => import("./reports/reportsMain.tsx"));
+const IncomesReports = lazy(() => import("./reports/incomesReports.tsx"));
+
+const LazyLoadFallback = <div>Loading...</div>;
 
 const router = createBrowserRouter([
   {
@@ -20,27 +24,51 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/",
-        element: <Home />,
+        element: (
+          <Suspense fallback={LazyLoadFallback}>
+            <Home />
+          </Suspense>
+        ),
       },
       {
         path: "/customers",
-        element: <CustomerMainScreen />,
+        element: (
+          <Suspense fallback={LazyLoadFallback}>
+            <CustomerMainScreen />
+          </Suspense>
+        ),
       },
       {
         path: "/loans",
-        element: <LoansMain />,
+        element: (
+          <Suspense fallback={LazyLoadFallback}>
+            <LoansMain />
+          </Suspense>
+        ),
       },
       {
         path: "/payments",
-        element: <PaymentsMain />,
+        element: (
+          <Suspense fallback={LazyLoadFallback}>
+            <PaymentsMain />
+          </Suspense>
+        ),
       },
       {
         path: "/customers-reports",
-        element: <ReportsMain />,
+        element: (
+          <Suspense fallback={LazyLoadFallback}>
+            <ReportsMain />
+          </Suspense>
+        ),
       },
       {
         path: "/incomes-reports",
-        element: <IncomesReports />,
+        element: (
+          <Suspense fallback={LazyLoadFallback}>
+            <IncomesReports />
+          </Suspense>
+        ),
       },
     ],
   },

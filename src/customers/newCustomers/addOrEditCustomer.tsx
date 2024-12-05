@@ -1,7 +1,8 @@
-import { Modal } from "antd";
-import NewCustomerForm from "./newCustomerForm";
+import { lazy, Suspense } from "react";
+import { Modal, Spin } from "antd";
 import { useAppDispatch, useAppSelector } from "../../hooks/useStore";
 import { setIsEditing, setShowCreateCustomerModal } from "../customerSlice";
+const NewCustomerForm = lazy(() => import("./newCustomerForm"));
 
 export default function AddOrEditCustomer() {
   const showCreateCustomerModal = useAppSelector(
@@ -23,7 +24,16 @@ export default function AddOrEditCustomer() {
       okButtonProps={{ hidden: true }}
       cancelButtonProps={{ hidden: true }}
     >
-      <NewCustomerForm />
+      <Suspense
+        fallback={
+          <Spin
+            size="large"
+            className="flex justify-center items-center h-full"
+          />
+        }
+      >
+        <NewCustomerForm />
+      </Suspense>
     </Modal>
   );
 }

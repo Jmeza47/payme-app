@@ -1,7 +1,8 @@
-import { Modal } from "antd";
+import { Modal, Spin } from "antd";
 import { useAppDispatch, useAppSelector } from "../../hooks/useStore";
 import { setShowLoansModal } from "../loansSlice";
-import LoansForm from "./loansForm";
+import { Suspense, lazy } from "react";
+const LoansForm = lazy(() => import("./loansForm"));
 
 export function AddOrEditLoan() {
   const showLoansModal = useAppSelector(
@@ -19,7 +20,16 @@ export function AddOrEditLoan() {
       okButtonProps={{ hidden: true }}
       cancelButtonProps={{ hidden: true }}
     >
-      <LoansForm />
+      <Suspense
+        fallback={
+          <Spin
+            size="large"
+            className="flex justify-center items-center h-full"
+          />
+        }
+      >
+        <LoansForm />
+      </Suspense>
     </Modal>
   );
 }

@@ -1,11 +1,23 @@
-import ShowCustomersTable from "./table/customersTable";
-import AddOrEditCustomer from "./newCustomers/addOrEditCustomer";
+import { Spin } from "antd";
+import React, { Suspense } from "react";
+
+const ShowCustomersTable = React.lazy(() => import("./table/customersTable"));
+const AddOrEditCustomer = React.lazy(
+  () => import("./newCustomers/addOrEditCustomer")
+);
 
 export default function CustomerMainScreen() {
   return (
-    <div>
-      <ShowCustomersTable />
+    <Suspense
+      fallback={
+        <Spin
+          size="large"
+          className="flex justify-center items-center h-full"
+        />
+      }
+    >
       <AddOrEditCustomer />
-    </div>
+      <ShowCustomersTable />
+    </Suspense>
   );
 }

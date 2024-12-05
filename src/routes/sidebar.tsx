@@ -2,6 +2,7 @@ import {
   AreaChartOutlined,
   BankOutlined,
   HomeOutlined,
+  LineChartOutlined,
   SnippetsOutlined,
   TeamOutlined,
 } from "@ant-design/icons";
@@ -46,7 +47,7 @@ const items: MenuItem[] = [
       {
         key: "incomes-reports",
         label: "Ingresos",
-        icon: <TeamOutlined />,
+        icon: <LineChartOutlined />,
       },
     ],
   },

@@ -1,7 +1,7 @@
-import { Table, Input, Card, TableColumnsType } from "antd";
+import { Table, Input, Card } from "antd";
 import { ICustomer } from "../../common/types";
 import { RowActions } from "./rowActions";
-import React, { useMemo, useState } from "react";
+import { useState } from "react";
 import {
   CustomersWithActiveCreditsWidget,
   NewCustomerWidget,
@@ -9,21 +9,25 @@ import {
 } from "../widgets/widgets";
 
 import { useGetCustomers } from "../hooks/api/useGetCustomers";
-
-const { Search } = Input;
+import debounce from "lodash/debounce";
+import { ColumnsType } from "antd/es/table";
 
 interface DataType {
   name: string;
   lastName: string;
-  address: string;
   dni: string;
+  address: string;
   phone1: string;
-  options: React.Component;
+  options?: React.ReactNode;
 }
+
+const { Search } = Input;
 
 export default function ShowCustomersTable() {
   const { customers, loading } = useGetCustomers();
   const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearch = debounce((e) => setSearchQuery(e.target.value), 300);
 
   const filteredCustomers =
     customers?.filter((edge) => {
@@ -31,7 +35,7 @@ export default function ShowCustomersTable() {
       if (!customer) return false;
 
       const fullName = `${customer.name} ${customer.lastName}`.toLowerCase();
-      const phone = customer.phone1?.toLowerCase(); // Handle potential undefined
+      const phone = customer.phone1?.toLowerCase() || ""; // Handle potential undefined
 
       return (
         fullName.includes(searchQuery.toLowerCase()) ||
@@ -39,45 +43,42 @@ export default function ShowCustomersTable() {
       );
     }) || [];
 
-  const columns: TableColumnsType<DataType> = useMemo(
-    () => [
-      {
-        title: "Nombre",
-        dataIndex: "name",
-        key: "name",
-        sorter: (a, b) => b.name.localeCompare(a.name),
-        sortOrder: { order: "ascend", columnKey: "name" },
-        sortIcon: () => null,
-        showSorterTooltip: false,
-      },
-      {
-        title: "Apellido",
-        dataIndex: "lastName",
-        key: "lastName",
-      },
-      {
-        title: "Nº de Identidad",
-        dataIndex: "dni",
-        key: "dni",
-      },
-      {
-        title: "Teléfono",
-        dataIndex: "phone1",
-        key: "phone1",
-      },
-      {
-        title: "Dirección",
-        dataIndex: "address",
-        key: "address",
-      },
-      {
-        title: "Opciones",
-        key: "options",
-        render: (record: ICustomer) => <RowActions customerRecord={record} />,
-      },
-    ],
-    []
-  );
+  const columns: ColumnsType<DataType> = [
+    {
+      title: "Nombre",
+      dataIndex: "name",
+      key: "name",
+      sorter: (a, b) => b.name.localeCompare(a.name),
+      sortOrder: "descend",
+      sortIcon: () => null,
+      showSorterTooltip: false,
+    },
+    {
+      title: "Apellido",
+      dataIndex: "lastName",
+      key: "lastName",
+    },
+    {
+      title: "Nº de Identidad",
+      dataIndex: "dni",
+      key: "dni",
+    },
+    {
+      title: "Teléfono",
+      dataIndex: "phone1",
+      key: "phone1",
+    },
+    {
+      title: "Dirección",
+      dataIndex: "address",
+      key: "address",
+    },
+    {
+      title: "Opciones",
+      key: "options",
+      render: (_, record: ICustomer) => <RowActions customerRecord={record} />,
+    },
+  ];
 
   return (
     <div className="space-y-4">
@@ -87,7 +88,7 @@ export default function ShowCustomersTable() {
           <div className="flex justify-center">
             <Search
               placeholder="Buscar por nombre, apellido o numero de telefono"
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={handleSearch}
               className="w-full"
             />
           </div>
@@ -101,7 +102,7 @@ export default function ShowCustomersTable() {
           columns={columns}
           loading={loading}
           dataSource={filteredCustomers.map((edge) => edge)}
-          pagination={{ pageSize: 5, simple: true }}
+          pagination={{ pageSize: 5, simple: true, showSizeChanger: false }}
           rowKey="_id"
         />
       </Card>

@@ -17,7 +17,7 @@ import { useGetLoans } from "../../loans/hooks/api/useGetLoans";
 export function TotalMoneyRecoverWidget() {
   const { loans } = useGetLoans();
 
-  const totalPaidAmount = useMemo(() => {
+  const totalPaidAmount = () => {
     return loans.reduce((total, loan) => {
       const loanPaidAmount = loan.paymentSchedule
         .filter((payment) => payment.status === "PAID")
@@ -25,12 +25,12 @@ export function TotalMoneyRecoverWidget() {
 
       return total + loanPaidAmount;
     }, 0);
-  }, [loans]);
+  };
 
   return (
     <InformationWidget
       title="Capital Recuperado"
-      data={moneyFormatter(totalPaidAmount)}
+      data={moneyFormatter(totalPaidAmount())}
       icon={<FireOutlined style={{ color: "red" }} />}
     />
   );
@@ -105,10 +105,13 @@ export function HistoricalMoneyLoanded() {
   const { loans } = useGetLoans();
 
   const totalPaidAmount = useMemo(() => {
-    return loans
-      .filter((loan) => loan.loanStatus === "PAID")
-      .reduce((acc, payment) => acc + payment.loanAmount, 0);
-  }, [loans]);
+    return loans.reduce((total, loan) => {
+      const loanPaidAmount = loan.paymentSchedule
+        .filter((payment) => payment.status === "PAID")
+        .reduce((sum, payment) => sum + payment.amountPaid, 0);
+      return total + loanPaidAmount;
+    }, 0);
+  }, [loans.map((loan) => loan._id)]);
 
   return (
     <InformationWidget
