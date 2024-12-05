@@ -1,10 +1,9 @@
-import { Button, Space, Modal, App } from "antd";
+import { Button, Space, Modal } from "antd";
 import {
   DeleteOutlined,
   EditOutlined,
   ExclamationCircleFilled,
 } from "@ant-design/icons";
-//import { useDeleteCustomer } from "../hooks/useDeleteCustomer";
 
 import { useDeleteCustomer } from "../hooks/api/useDeleteCustomer";
 import { useAppDispatch } from "../../hooks/useStore";
@@ -15,7 +14,6 @@ import {
 } from "../customerSlice";
 import { ICustomer } from "../../common/types";
 import { useDeleteLoansByCustomerId } from "../../loans/hooks/api/useDeleteLoansByCustomer";
-//import { useDeleteLoansByCustomer } from "../../loans/hooks/useDeleteLoansByCustomer";
 
 const { confirm } = Modal;
 
@@ -24,8 +22,6 @@ export function RowActions({ customerRecord }: { customerRecord: ICustomer }) {
 
   const { deleteCustomer } = useDeleteCustomer();
   const { deleteLoansByCustomer } = useDeleteLoansByCustomerId();
-  //const { handleDeleteCustomer } = useDeleteCustomer();
-  //const { handleDeleteLoansByCustomer } = useDeleteLoansByCustomer();
 
   const handleEdit = () => {
     dispatch(setIsEditing(true));
@@ -33,10 +29,14 @@ export function RowActions({ customerRecord }: { customerRecord: ICustomer }) {
     dispatch(setShowCreateCustomerModal(true));
   };
 
-  const handleDelete = () => {
-    if (customerRecord._id) {
-      deleteCustomer(customerRecord._id);
-      deleteLoansByCustomer(customerRecord._id);
+  const handleDelete = async () => {
+    try {
+      if (customerRecord._id) {
+        await deleteCustomer(customerRecord._id);
+        await deleteLoansByCustomer(customerRecord._id);
+      }
+    } catch (error) {
+      console.error("Error deleting customer or related loans:", error);
     }
   };
 
@@ -49,18 +49,14 @@ export function RowActions({ customerRecord }: { customerRecord: ICustomer }) {
       okText: "Eliminar",
       cancelText: "Cancelar",
       type: "warning",
-      onOk() {
-        handleDelete();
-      },
+      onOk: handleDelete,
     });
   };
 
   return (
-    <App>
-      <Space>
-        <Button icon={<EditOutlined />} onClick={handleEdit} />
-        <Button onClick={showConfirm} danger icon={<DeleteOutlined />} />
-      </Space>
-    </App>
+    <Space>
+      <Button icon={<EditOutlined />} onClick={handleEdit} />
+      <Button onClick={showConfirm} danger icon={<DeleteOutlined />} />
+    </Space>
   );
 }

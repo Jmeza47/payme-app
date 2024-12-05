@@ -4,6 +4,7 @@ import { setShowConfirmationPaymentModal } from "../paymentsSlice";
 import { useUpdateLoanStatus } from "../../loans/hooks/api/useUpdateLoanStatus";
 import { useUpdatePaymentStatus } from "../../loans/hooks/api/useUpdatePaymentStatus";
 import { useGetLoans } from "../../loans/hooks/api/useGetLoans";
+import { useMemo } from "react";
 
 export default function ConfirmPaymentModal({
   loanId,
@@ -17,9 +18,10 @@ export default function ConfirmPaymentModal({
   );
   const { loans } = useGetLoans();
   const { updateLoanStatus } = useUpdateLoanStatus();
-  const paymentSchedule = loans.find(
-    (loan) => loan._id === loanId
-  )?.paymentSchedule;
+
+  const paymentSchedule = useMemo(() => {
+    return loans.find((loan) => loan._id === loanId)?.paymentSchedule;
+  }, [loans, loanId]);
 
   const handleUpdateLoan = () => {
     const allPaymentsPaid =
@@ -30,6 +32,7 @@ export default function ConfirmPaymentModal({
       updateLoanStatus(loanId, "PAID");
     }
   };
+
   const { updatePaymentStatus } = useUpdatePaymentStatus();
   const dispatch = useAppDispatch();
 
@@ -47,7 +50,7 @@ export default function ConfirmPaymentModal({
       maskClosable={false}
       okText="Confirmar"
       cancelText="Cancelar"
-      onOk={() => onOk()}
+      onOk={onOk}
       onCancel={() => dispatch(setShowConfirmationPaymentModal(false))}
       centered
       destroyOnClose

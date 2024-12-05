@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState } from "react";
 import { Card, DatePicker, Table, Button, Spin, TableColumnsType } from "antd";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { DownloadOutlined } from "@ant-design/icons";
@@ -133,9 +133,9 @@ export default function IncomesReports() {
     [customerNameMap]
   );
 
-  const handleDateChange = useCallback((dates: any) => {
+  const handleDateChange = (dates) => {
     setDateRange(dates);
-  }, []);
+  };
 
   if (loading) {
     return (

@@ -1,13 +1,21 @@
-import { useState, useMemo, useEffect, useCallback } from "react";
-import PaymentsTable from "./paymentsTable";
+import {
+  useState,
+  useMemo,
+  useEffect,
+  useCallback,
+  lazy,
+  Suspense,
+} from "react";
+const PaymentsTable = lazy(() => import("./paymentsTable"));
 import dayjs from "dayjs";
 import { useGetCustomers } from "../../customers/hooks/api/useGetCustomers";
 import { useUpdateLoanStatus } from "../../loans/hooks/api/useUpdateLoanStatus";
 import { useGetLoans } from "../../loans/hooks/api/useGetLoans";
 import { useUpdatePaymentDueDays } from "../../loans/hooks/api/useUpdatePaymentDueDays";
 import { moneyFormatter } from "../../utils/moneyFormatter";
-import { debounce } from "lodash";
+import debounce from "lodash/debounce";
 import { PaymentScheduleInput } from "../../common/types";
+import { Spin } from "antd";
 
 export default function Payments() {
   const { loans } = useGetLoans();
@@ -32,60 +40,67 @@ export default function Payments() {
 
   // Filtered loans based on selected customer
   const filteredLoans = useMemo(() => {
-    return selectedCustomer
-      ? loans.filter((loan) => loan.customerId === selectedCustomer)
-      : [];
+    if (!selectedCustomer) return [];
+    return loans.filter((loan) => loan.customerId === selectedCustomer);
   }, [selectedCustomer, loans]);
 
   // Loans options to show in the dropdown (not PAID status)
-  const loansOptions = useMemo(() => {
-    return filteredLoans
-      .filter((loan) => loan.loanStatus !== "PAID")
-      .map((loan) => ({
-        value: loan._id,
-        label: `Fecha: ${dayjs(loan.loanDate).format(
-          "DD/MM/YYYY"
-        )} --- Capital: ${moneyFormatter(loan.loanAmount)}`,
-        key: loan._id,
-      }));
-  }, [filteredLoans]);
+  const loansOptions = useMemo(
+    () =>
+      filteredLoans
+        .map((loan) => ({
+          value: loan._id,
+          label: `Fecha: ${dayjs(loan.loanDate).format(
+            "DD/MM/YYYY"
+          )} --- Capital: ${moneyFormatter(loan.loanAmount)}`,
+          key: loan._id,
+        }))
+        .filter((loanOption) => loanOption.value && loanOption.label),
+    [filteredLoans]
+  );
+
+  const loanMap = useMemo(
+    () =>
+      loans.reduce((acc, loan) => {
+        acc[loan._id] = loan;
+        return acc;
+      }, {}),
+    [loans]
+  );
 
   // Payment schedule for the selected loan
-  const paymentSchedule = useMemo(() => {
-    const selectedLoanData = loans.find((loan) => loan._id === selectedLoan);
-    return selectedLoanData?.paymentSchedule || [];
-  }, [selectedLoan, loans]);
+  const paymentSchedule = loanMap[selectedLoan]?.paymentSchedule || [];
 
-  // Calculate paid amount
-  const paidAmountTotal = useMemo(() => {
-    return paymentSchedule
-      .filter((payment) => payment.status === "PAID")
-      .reduce((sum, payment) => sum + payment.amountPaid, 0);
-  }, [paymentSchedule]);
+  const { paidAmountTotal, paidInterestTotal, pendingPaymentsTotal } =
+    useMemo(() => {
+      let paidAmount = 0,
+        paidInterest = 0,
+        pendingPayments = 0;
 
-  // Calculate paid interest
-  const paidInterestTotal = useMemo(() => {
-    return paymentSchedule
-      .filter((payment) => payment.status === "PAID")
-      .reduce((sum, payment) => sum + payment.interestPaid, 0);
-  }, [paymentSchedule]);
+      paymentSchedule.forEach((payment) => {
+        if (payment.status === "PAID") {
+          paidAmount += payment.amountPaid;
+          paidInterest += payment.interestPaid;
+        } else {
+          pendingPayments++;
+        }
+      });
 
-  // Calculate pending payments
-  const pendingPaymentsTotal = useMemo(() => {
-    return paymentSchedule
-      .filter((payment) => payment.status !== "PAID")
-      .reduce((sum) => sum + 1, 0);
-  }, [paymentSchedule]);
+      return {
+        paidAmountTotal: paidAmount,
+        paidInterestTotal: paidInterest,
+        pendingPaymentsTotal: pendingPayments,
+      };
+    }, [paymentSchedule]);
 
   // Debounced update for payment due days
-  const debouncedUpdatePayments = useMemo(
-    () =>
-      debounce((updates) => {
-        updates.forEach(({ paymentId, dueDays, extraInterest }) =>
-          updatePaymentDueDays(selectedLoan, paymentId, dueDays, extraInterest)
-        );
-      }, 300), // 300ms debounce
-    [updatePaymentDueDays]
+  const debouncedUpdatePayments = useCallback(
+    debounce((updates) => {
+      updates.forEach(({ paymentId, dueDays, extraInterest }) =>
+        updatePaymentDueDays(selectedLoan, paymentId, dueDays, extraInterest)
+      );
+    }, 300),
+    [updatePaymentDueDays, selectedLoan] // Only recreate if selectedLoan or updatePaymentDueDays change
   );
 
   // Update due days and interest if payment is active and overdue
@@ -138,15 +153,13 @@ export default function Payments() {
       const allPaid = paymentSchedule.every(
         (payment) => payment.status === "PAID"
       );
-      const currentLoanStatus = loans.find(
-        (loan) => loan._id === selectedLoan
-      )?.loanStatus;
+      const currentLoanStatus = loanMap[selectedLoan]?.loanStatus;
 
       if (allPaid && currentLoanStatus !== "PAID") {
         updateLoanStatus(selectedLoan, "PAID");
       }
     }
-  }, [paymentSchedule, selectedLoan, loans, updateLoanStatus]);
+  }, [paymentSchedule, selectedLoan, loanMap, updateLoanStatus]);
 
   // Cleanup on component unmount or when debounce changes
   useEffect(() => {
@@ -156,19 +169,28 @@ export default function Payments() {
   }, [debouncedUpdatePayments]);
 
   return (
-    <PaymentsTable
-      loansOptions={loansOptions}
-      customerOptions={customerOptions}
-      selectedCustomer={selectedCustomer}
-      selectedLoan={selectedLoan}
-      paidAmountTotal={paidAmountTotal}
-      paidInterestTotal={paidInterestTotal}
-      pendingPaymentsTotal={pendingPaymentsTotal}
-      paymentSchedule={paymentSchedule}
-      selectedPayment={selectedPayment}
-      setSelectedLoan={setSelectedLoan}
-      setSelectedCustomer={setSelectedCustomer}
-      setSelectedPayment={setSelectedPayment}
-    />
+    <Suspense
+      fallback={
+        <Spin
+          size="large"
+          className="flex justify-center items-center h-full"
+        />
+      }
+    >
+      <PaymentsTable
+        loansOptions={loansOptions}
+        customerOptions={customerOptions}
+        selectedCustomer={selectedCustomer}
+        selectedLoan={selectedLoan}
+        paidAmountTotal={paidAmountTotal}
+        paidInterestTotal={paidInterestTotal}
+        pendingPaymentsTotal={pendingPaymentsTotal}
+        paymentSchedule={paymentSchedule}
+        selectedPayment={selectedPayment}
+        setSelectedLoan={setSelectedLoan}
+        setSelectedCustomer={setSelectedCustomer}
+        setSelectedPayment={setSelectedPayment}
+      />
+    </Suspense>
   );
 }

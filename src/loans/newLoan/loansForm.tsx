@@ -2,18 +2,17 @@ import { Button, Form, InputNumber, Select } from "antd";
 import { useGenerateWeeklyPayments } from "../hooks/useGenerateLoanPayments";
 import { PaymentsTable } from "../loansTables/paymentsTable";
 import useFormValidationBeforeSubmit from "../../hooks/useFormValidateBeforeSubmit";
-//import { useCreateLoan } from "../hooks/useCreateLoan";
 import { ILoans, PaymentScheduleInput } from "../../common/types";
 import { useAppDispatch } from "../../hooks/useStore";
 import { setShowLoansModal } from "../loansSlice";
 import { useGetCustomers } from "../../customers/hooks/api/useGetCustomers";
 import { useCreateLoan } from "../hooks/api/useCreateLoan";
 import { v4 as uuidv4 } from "uuid";
+import { useMemo } from "react";
 
 export default function LoansForm() {
   const { customers } = useGetCustomers();
   const { submittable, form, values } = useFormValidationBeforeSubmit();
-  //const { handleCreateLoan } = useCreateLoan();
   const { addNewLoan } = useCreateLoan();
   const dispatch = useAppDispatch();
   const { paymentSchedule, generatePaymentSchedule } =
@@ -26,16 +25,18 @@ export default function LoansForm() {
     }))
     .sort((a, b) => a.label.localeCompare(b.label));
 
-  const generatedPaymentSchedule: PaymentScheduleInput[] = paymentSchedule.map(
-    (payment) => ({
-      _id: uuidv4(),
-      paymentDate: payment.nextPaymentDate,
-      amountPaid: payment.capitalWeekly,
-      interestPaid: payment.interestWeekly,
-      dueDays: 0,
-      extraInterest: 0,
-      status: "ACTIVE",
-    })
+  const generatedPaymentSchedule: PaymentScheduleInput[] = useMemo(
+    () =>
+      paymentSchedule.map((payment) => ({
+        _id: uuidv4(),
+        paymentDate: payment.nextPaymentDate,
+        amountPaid: payment.capitalWeekly,
+        interestPaid: payment.interestWeekly,
+        dueDays: 0,
+        extraInterest: 0,
+        status: "ACTIVE",
+      })),
+    [paymentSchedule] // Recalculate only when paymentSchedule changes
   );
 
   const handleFormSubmit = () => {
@@ -98,22 +99,6 @@ export default function LoansForm() {
             },
           ]}
         >
-          {/*
-          <Select
-            placeholder="Taza de interes"
-            options={[
-              { value: 12, label: "12%" },
-              { value: 15, label: "15%" },
-            ]}
-            onSelect={(interest) => {
-              generatePaymentSchedule(
-                values.loanAmount,
-                interest,
-                values.loanTerm
-              );
-            }}
-          />
-          */}
           <InputNumber<number>
             min={0}
             step={1}

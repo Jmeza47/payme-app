@@ -6,6 +6,9 @@ import { NewLoanButtonWidget } from "../Widget/loansWidgets";
 import { useGetCustomers } from "../../customers/hooks/api/useGetCustomers";
 import { useGetLoans } from "../hooks/api/useGetLoans";
 import dayjs from "dayjs";
+import debounce from "lodash/debounce";
+
+dayjs.locale("es");
 
 export default function ShowLoansTable() {
   const { customers, loading: customerLoading } = useGetCustomers();
@@ -15,6 +18,7 @@ export default function ShowLoansTable() {
 
   const loading = customerLoading || loansLoading;
 
+  // Memoize customerNameMap to avoid unnecessary recalculations
   const customerNameMap = useMemo(() => {
     if (!customers || customers.length === 0) return {};
     return customers.reduce((acc, customer) => {
@@ -23,6 +27,7 @@ export default function ShowLoansTable() {
     }, {} as Record<string, string>);
   }, [customers]);
 
+  // Memoize filteredLoans to avoid unnecessary re-calculations
   const filteredLoans = useMemo(() => {
     if (!loans || !customers) return [];
     return loans.filter((loan) => {
@@ -91,6 +96,11 @@ export default function ShowLoansTable() {
     },
   ];
 
+  // Debounced search handler
+  const handleSearchChange = debounce((e) => {
+    setSearchQuery(e.target.value);
+  }, 300); // Wait for 300ms after typing stops
+
   return (
     <div className="space-y-4 w-full">
       <div className="flex justify-between space-x-4">
@@ -101,7 +111,7 @@ export default function ShowLoansTable() {
           className="w-full"
         >
           <Input.Search
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={handleSearchChange}
             placeholder="Buscar cliente"
           />
         </Card>
@@ -112,7 +122,11 @@ export default function ShowLoansTable() {
           columns={columns}
           dataSource={filteredLoans}
           rowKey="_id"
-          pagination={{ defaultPageSize: 5 }}
+          pagination={{
+            defaultPageSize: 5,
+            simple: true,
+            showSizeChanger: false,
+          }}
         />
       </Card>
     </div>

@@ -21,18 +21,18 @@ export function CustomersWithActiveCreditsWidget({
   const { customers } = useGetCustomers();
 
   const activeCustomerCount = useMemo(() => {
-    if (!loans) return 0;
+    if (!loans || !customers) return 0;
 
-    const customersWithActiveLoans = new Set();
-    loans.forEach((loan) => {
-      if (loan?.loanStatus === "active") {
-        customersWithActiveLoans.add(loan?.customerId);
-      }
-    });
+    const activeCustomerIds = new Set(
+      loans
+        .filter((loan) => loan?.loanStatus === "active")
+        .map((loan) => loan.customerId)
+    );
 
-    return customers.filter((edge) => customersWithActiveLoans.has(edge._id))
+    return customers.filter((customer) => activeCustomerIds.has(customer._id))
       .length;
   }, [customers, loans]);
+
   return (
     <InformationWidget
       title="Con creditos Activos"
@@ -45,7 +45,11 @@ export function CustomersWithActiveCreditsWidget({
 
 export function TotalCustomersCountWidget({ width }: { width?: string }) {
   const { customers } = useGetCustomers();
-  const totalCustomers = useMemo(() => customers.length, [customers]);
+  const totalCustomers = useMemo(() => {
+    if (!customers) return 0;
+    return customers.length;
+  }, [customers]);
+
   return (
     <InformationWidget
       title="Clientes Totales"
@@ -58,6 +62,13 @@ export function TotalCustomersCountWidget({ width }: { width?: string }) {
 
 export function NewCustomerWidget({ width }: { width?: string }) {
   const dispatch = useDispatch();
+
+  const handleClick = useMemo(
+    () => () => {
+      dispatch(setShowCreateCustomerModal(true));
+    },
+    [dispatch]
+  );
   return (
     <Card
       title="Agregar Cliente"
@@ -65,13 +76,7 @@ export function NewCustomerWidget({ width }: { width?: string }) {
       type="inner"
     >
       <AddOrEditCustomer />
-      <Button
-        onClick={() => {
-          dispatch(setShowCreateCustomerModal(true));
-        }}
-        type="primary"
-        className="w-full"
-      >
+      <Button onClick={handleClick} type="primary" className="w-full">
         <PlusOutlined />
         Nuevo
       </Button>

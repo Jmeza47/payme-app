@@ -1,10 +1,14 @@
-import ShowLoansTable from "./loansTables/loansTable";
+import { Suspense, lazy } from "react";
+
+const ShowLoansTable = lazy(() => import("./loansTables/loansTable"));
+
 import {
   LoansCountWidget,
   ActiveLoansCountWidget,
   TotalMoneyBorrowedWidget,
   TotalInterestAccruedWidget,
 } from "./Widget/loansWidgets";
+import { Spin } from "antd";
 
 export default function LoansMain() {
   return (
@@ -15,7 +19,16 @@ export default function LoansMain() {
         <TotalMoneyBorrowedWidget />
         <TotalInterestAccruedWidget />
       </div>
-      <ShowLoansTable />
+      <Suspense
+        fallback={
+          <Spin
+            size="large"
+            className="flex justify-center items-center h-full"
+          />
+        }
+      >
+        <ShowLoansTable />
+      </Suspense>
     </div>
   );
 }
